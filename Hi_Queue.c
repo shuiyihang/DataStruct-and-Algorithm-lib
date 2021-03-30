@@ -4,22 +4,29 @@
 
 void Hi_initQueue(Hi_Queue* q)
 {
-    // q->front->next=NULL;
-    // q->tail->next=NULL;
-    q->tail=NULL;
+    q->front=q->tail=NULL;
 }
 
 void Hi_EnQueue(Hi_Queue* q,Hi_Seek_Ptr* node)
 {
+    if(!q->tail)
+    {
+        q->front=q->tail=node;
+        q->tail->next=NULL;
+        return;
+    }
     q->tail->next=node;
     q->tail=node;
+    q->tail->next=NULL;
 }
 Hi_Seek_Ptr* Hi_DeQueue(Hi_Queue* q)
 {
     Hi_Seek_Ptr* temp;
-    if(q->front!=q->tail)
+    if(q->front!=NULL)
     {
-        temp=q->front->next;
+        temp=q->front;
+        q->front=temp->next;
+        return temp;
 
     }else
     {
@@ -29,5 +36,5 @@ Hi_Seek_Ptr* Hi_DeQueue(Hi_Queue* q)
 
 int Hi_Queue_is_empty(Hi_Queue q)
 {
-    return q.front==q.tail;
+    return q.front==NULL;
 }

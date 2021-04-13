@@ -52,7 +52,8 @@ static inline int queue_empty(const struct queue_head *head)
 
 
 
-
+#define queue_entry(ptr, type, member)      \
+    CONTAINER_OF(ptr, type, member)
 
 
 

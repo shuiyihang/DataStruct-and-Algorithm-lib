@@ -50,6 +50,8 @@ static inline int stack_empty(const struct stack_head *top)
 }
 
 
+#define stack_entry(ptr, type, member)      \
+    CONTAINER_OF(ptr, type, member)
 
 
 

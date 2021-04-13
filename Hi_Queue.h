@@ -56,16 +56,6 @@ static inline int queue_empty(const struct queue_head *head)
     CONTAINER_OF(ptr, type, member)
 
 
-
-
-
-
-
-
-
-
-
-
 #ifdef __cplusplus
 }
 #endif

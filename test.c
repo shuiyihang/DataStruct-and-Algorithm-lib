@@ -9,6 +9,8 @@
 
 
 #include "Hi_list.h"
+
+#include "Hi_sort.h"
 typedef struct
 {
     int data;
@@ -36,6 +38,14 @@ void main()
 
     five.data=50;
     five.name="five data";
+
+    int data[]={15,29,10,20,40,30,11,29};
+
+
+    quick_sort(data,0,(sizeof(data)/sizeof(int))-1);
+    for(int i=0;i<sizeof(data)/sizeof(int);i++){
+        printf("%d\n",data[i]);
+    }
 
 
     // LIST_HEAD(test_list);
@@ -66,19 +76,19 @@ void main()
     //     printf("%d,%s\n",four->data,four->name);
     // }
 
-    QUEUE_HEAD(test_queue);
-    queue_push(&one.queue_clue,&test_queue);
-    queue_push(&two.queue_clue,&test_queue);
-    queue_push(&three.queue_clue,&test_queue);
-    queue_push(&five.queue_clue,&test_queue);
+    // QUEUE_HEAD(test_queue);
+    // queue_push(&one.queue_clue,&test_queue);
+    // queue_push(&two.queue_clue,&test_queue);
+    // queue_push(&three.queue_clue,&test_queue);
+    // queue_push(&five.queue_clue,&test_queue);
 
-    struct queue_head* p2;
-    while(!queue_empty(&test_queue))
-    {
-        p2=queue_pop(&test_queue);
-        four=queue_entry(p2,test,queue_clue);
-        printf("%d,%s\n",four->data,four->name);
-    }
+    // struct queue_head* p2;
+    // while(!queue_empty(&test_queue))
+    // {
+    //     p2=queue_pop(&test_queue);
+    //     four=queue_entry(p2,test,queue_clue);
+    //     printf("%d,%s\n",four->data,four->name);
+    // }
 
 
 }

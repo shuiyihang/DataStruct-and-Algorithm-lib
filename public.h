@@ -5,12 +5,8 @@
 #include "stdlib.h"
 
 #define CONTAINER_OF(ptr,type,member) ({\
-const typeof(&((type*)0)->member) *__mptr=ptr;\
-(type*)((char*)__mptr-(int)(&((type*)0)->member));\
+(type*)((char*)ptr-(size_t)(&((type*)0)->member));\
 })
-
-
-
 
 
 #endif 

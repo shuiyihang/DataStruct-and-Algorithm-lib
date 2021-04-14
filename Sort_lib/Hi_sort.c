@@ -37,7 +37,7 @@ void insert_sort(int data[], int len)
 {
     for(int i = 1; i < len; i++){
         int ok_top = i-1;
-        int current=data[i];
+        int current = data[i];
         while(current < data[ok_top]&&ok_top >= 0){
             data[ok_top+1] = data[ok_top];
             ok_top--;
@@ -70,7 +70,7 @@ static int _quick_sort_part(int data[],int start, int end)
         }
         
     }
-    data[prev_cur]=divide;
+    data[prev_cur] = divide;
     return prev_cur;
 }
 

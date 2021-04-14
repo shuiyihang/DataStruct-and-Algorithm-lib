@@ -2,17 +2,17 @@
 #include "stdlib.h"
 #include "stdio.h"
 
-#include "public.h"
-#include "Hi_Stack.h"
+#include "./Common_Struct_lib/public.h"
+#include "./Common_Struct_lib/Hi_Stack.h"
 
-#include "Hi_Queue.h"
+#include "./Common_Struct_lib/Hi_Queue.h"
 
 
-#include "Hi_list.h"
+#include "./Common_Struct_lib/Hi_list.h"
 
-#include "Hi_sort.h"
+#include "./Sort_lib/Hi_sort.h"
 
-#include "Hi_PriorityQueue.h"
+#include "./Common_Struct_lib/Hi_PriorityQueue.h"
 typedef struct
 {
     int data;

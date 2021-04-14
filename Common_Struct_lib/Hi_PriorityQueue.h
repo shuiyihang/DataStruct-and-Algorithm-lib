@@ -20,6 +20,7 @@ struct priority_queue_info
     char* name;//用户自定义的数据放在下面
 };
 
+typedef struct priority_queue_info prio_queue_info;
 
 
 static inline void __queue_node_inset(struct list_head *_new, struct list_head *_pos)

@@ -13,43 +13,69 @@
 #include "./Sort_lib/Hi_sort.h"
 
 #include "./Common_Struct_lib/Hi_PriorityQueue.h"
-typedef struct
-{
-    int data;
-    char* name;
-    struct stack_head clue;
-    struct queue_head queue_clue;
-    struct list_head list_clue;
-}test;
+
+#include "./Graph_Algorithm_lib/Hi_Graph.h"
+// typedef struct
+// {
+//     int data;
+//     char* name;
+//     struct stack_head clue;
+//     struct queue_head queue_clue;
+//     struct list_head list_clue;
+// }test;
+
+unsigned char test_maze[][10]={
+    {0,0,0,0,0,0,0,0,1,1},
+    {1,0,0,0,0,0,0,0,1,1},
+    {0,0,0,1,0,0,0,0,0,0},
+    {0,0,0,1,1,0,0,1,0,1},
+    {0,0,0,0,0,0,0,0,1,1},
+    {0,0,0,0,0,0,0,0,0,0},
+    {1,1,1,1,0,1,1,1,0,0},
+    {0,0,0,0,0,0,1,0,1,0},
+    {1,0,0,1,0,1,0,0,0,0},
+    {1,0,1,0,0,0,0,1,0,0}
+};
+
+
+
+
 
 void main()
 {
 
-    struct priority_queue_info info1,info2,info3,info4,info5;
+    struct win_size size={10,10};
+    struct local_pos start,end;
+    start.x=0;
+    start.y=0;
+    end.x=9;
+    end.y=9;
+    A_star(test_maze,size,start,end);
+    // struct priority_queue_info info1,info2,info3,info4,info5;
 
-    info1.name="i am info1";
-    info1.prior=7;
-    info2.name="i am info2";
-    info2.prior=2;
-    info3.name="i am info3";
-    info3.prior=6;
-    info4.name="i am info4";
-    info4.prior=5;
-    info5.name="i am info5";
-    info5.prior=3;
+    // info1.name="i am info1";
+    // info1.prior=7;
+    // info2.name="i am info2";
+    // info2.prior=2;
+    // info3.name="i am info3";
+    // info3.prior=6;
+    // info4.name="i am info4";
+    // info4.prior=5;
+    // info5.name="i am info5";
+    // info5.prior=3;
 
-    LIST_HEAD(test_prior);
-    priority_queue_push(&info1,&test_prior);
-    priority_queue_push(&info2,&test_prior);
-    priority_queue_push(&info3,&test_prior);
-    priority_queue_push(&info4,&test_prior);
-    priority_queue_push(&info5,&test_prior);
+    // LIST_HEAD(test_prior);
+    // priority_queue_push(&info1,&test_prior);
+    // priority_queue_push(&info2,&test_prior);
+    // priority_queue_push(&info3,&test_prior);
+    // priority_queue_push(&info4,&test_prior);
+    // priority_queue_push(&info5,&test_prior);
 
-    struct priority_queue_info *pos=NULL;
-    list_for_each_entry(pos,&test_prior,prior_hook)
-    {
-         printf("%s\n",pos->name);
-    }
+    // struct priority_queue_info *pos=NULL;
+    // list_for_each_entry(pos,&test_prior,prior_hook)
+    // {
+    //      printf("%s\n",pos->name);
+    // }
 
 
 

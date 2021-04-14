@@ -2,6 +2,10 @@
     "files.associations": {
         "stdio.h": "c",
         "hi_queue.h": "c",
-        "hi_sort.h": "c"
+        "hi_sort.h": "c",
+        "hi_priorityqueue.h": "c",
+        "hi_list.h": "c",
+        "hi_stack.h": "c",
+        "hi_graph.h": "c"
     }
 }

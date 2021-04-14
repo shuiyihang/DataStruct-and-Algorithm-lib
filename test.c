@@ -11,6 +11,8 @@
 #include "Hi_list.h"
 
 #include "Hi_sort.h"
+
+#include "Hi_PriorityQueue.h"
 typedef struct
 {
     int data;
@@ -22,30 +24,61 @@ typedef struct
 
 void main()
 {
-    test one;
-    test two;
-    test three;
-    test five;
-    test *four;
-    one.data=10;
-    one.name="one data";
 
-    two.data=20;
-    two.name="two data";
+    struct priority_queue_info info1,info2,info3,info4,info5;
 
-    three.data=30;
-    three.name="three data";
+    info1.name="i am info1";
+    info1.prior=7;
+    info2.name="i am info2";
+    info2.prior=2;
+    info3.name="i am info3";
+    info3.prior=6;
+    info4.name="i am info4";
+    info4.prior=5;
+    info5.name="i am info5";
+    info5.prior=3;
 
-    five.data=50;
-    five.name="five data";
+    LIST_HEAD(test_prior);
+    priority_queue_push(&info1,&test_prior);
+    priority_queue_push(&info2,&test_prior);
+    priority_queue_push(&info3,&test_prior);
+    priority_queue_push(&info4,&test_prior);
+    priority_queue_push(&info5,&test_prior);
 
-    int data[]={15,29,10,20,40,30,11,29};
-
-
-    quick_sort(data,0,(sizeof(data)/sizeof(int))-1);
-    for(int i=0;i<sizeof(data)/sizeof(int);i++){
-        printf("%d\n",data[i]);
+    struct priority_queue_info *pos=NULL;
+    list_for_each_entry(pos,&test_prior,prior_hook)
+    {
+         printf("%s\n",pos->name);
     }
+
+
+
+
+
+    // test one;
+    // test two;
+    // test three;
+    // test five;
+    // test *four;
+    // one.data=10;
+    // one.name="one data";
+
+    // two.data=20;
+    // two.name="two data";
+
+    // three.data=30;
+    // three.name="three data";
+
+    // five.data=50;
+    // five.name="five data";
+
+    // int data[]={15,29,10,20,40,30,11,29};
+
+
+    // quick_sort(data,0,(sizeof(data)/sizeof(int))-1);
+    // for(int i=0;i<sizeof(data)/sizeof(int);i++){
+    //     printf("%d\n",data[i]);
+    // }
 
 
     // LIST_HEAD(test_list);

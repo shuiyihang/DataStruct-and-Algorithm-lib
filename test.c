@@ -15,6 +15,8 @@
 #include "./Common_Struct_lib/Hi_PriorityQueue.h"
 
 #include "./Graph_Algorithm_lib/Hi_Graph.h"
+
+#include "./String_match_lib/kmp.h"
 // typedef struct
 // {
 //     int data;
@@ -39,18 +41,19 @@ unsigned char test_maze[][10]={
 
 
 
-
-
+u8_t pat_str[]="ababcabaaa";
+u8_t tar_str[]="abca";
 void main()
 {
-
-    struct win_size size={10,10};
-    struct local_pos start,end;
-    start.x=0;
-    start.y=0;
-    end.x=9;
-    end.y=9;
-    A_star(test_maze,size,start,end);
+    int result=kmp(pat_str,sizeof(pat_str)-1,tar_str,sizeof(tar_str)-1);
+    printf("result:%d\n",result);
+    // struct win_size size={10,10};
+    // struct local_pos start,end;
+    // start.x=0;
+    // start.y=0;
+    // end.x=9;
+    // end.y=9;
+    // A_star(test_maze,size,start,end);
     // struct priority_queue_info info1,info2,info3,info4,info5;
 
     // info1.name="i am info1";

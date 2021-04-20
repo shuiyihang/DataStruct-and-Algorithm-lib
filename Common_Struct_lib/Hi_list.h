@@ -53,7 +53,8 @@ static inline void __list_del(struct list_head *prev, struct list_head *next)
     
 }
 /**
- * 库里不做释放工作，如有需要外部定义指针变量malloc分配，free释放
+ * 库里不做内存释放工作，如有需要外部定义指针变量malloc分配，free释放
+ * 参考A star算法的使用操作
 */
 static inline void list_del(struct list_head *entry)
 {

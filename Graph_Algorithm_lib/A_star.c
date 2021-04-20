@@ -10,11 +10,6 @@
 #include "../Common_Struct_lib/Hi_PriorityQueue.h"
 #include "../Common_Struct_lib/Hi_Stack.h"
 
-#define     MAX_VALUE       65535
-#define     OBSTACLE_VALUE  1
-
-#define     u8_t        unsigned char
-#define     u16_t       unsigned int
 
 typedef struct 
 {
@@ -29,10 +24,6 @@ typedef struct
     struct stack_head clue;
 }stack_data;
 
-static int __sub_abs(int a, int b)
-{
-    return a>b?a-b:b-a;
-}
 
 static custom_data* __get_content(struct list_head *node)
 {
@@ -63,14 +54,14 @@ void A_star(u8_t maze[][10],struct win_size maze_size, struct local_pos start, s
 
 
     custom_data *push_data = (custom_data*)malloc(sizeof(custom_data));
-    custom_data *pop_data;
+    custom_data *pop_data = NULL;
     push_data->pos = start;
     push_data->node_info.prior = 0;
     priority_queue_push(&push_data->node_info,&queue);
     dis[start.y][start.x] = 0;
 
     while(!list_empty(&queue)){
-        unsigned char find = 0;
+        u8_t find = 0;
         pop_data=__get_content(queue.next);
         printf("%d===%d\n",pop_data->pos.x,pop_data->pos.y);
 
@@ -81,7 +72,7 @@ void A_star(u8_t maze[][10],struct win_size maze_size, struct local_pos start, s
             if((smell.x<maze_size.width && smell.x>=0)
              &&(smell.y<maze_size.height && smell.y>=0)
              &&(maze[smell.y][smell.x] != OBSTACLE_VALUE)){
-                printf("\n");
+
                 int temp_dis = dis[pop_data->pos.y][pop_data->pos.x]+1;
                 if(temp_dis<dis[smell.y][smell.x]){
                     dis[smell.y][smell.x] = temp_dis;
@@ -107,9 +98,7 @@ void A_star(u8_t maze[][10],struct win_size maze_size, struct local_pos start, s
              }
         }
         if(find){
-            while (!list_empty(&queue))
-            {
-
+            while (!list_empty(&queue)){
                 pop_data=__get_content(queue.next);
                 free(pop_data);
             }
@@ -124,7 +113,8 @@ void A_star(u8_t maze[][10],struct win_size maze_size, struct local_pos start, s
                 cur_data=new_data;
             }
 
-            //TODO 根据栈中内容执行刷屏
+            //TODO 
+            //把结果参数传出解耦
             while(!stack_empty(&stack)){
                 struct stack_head* temp_stack_node = stack_pop(&stack);
                 stack_data *finally = list_entry(temp_stack_node,stack_data,clue);

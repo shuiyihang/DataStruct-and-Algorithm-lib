@@ -4,6 +4,11 @@
 
 #include "stdlib.h"
 
+
+#define     u8_t        unsigned char
+#define     u16_t       unsigned int
+
+
 #define CONTAINER_OF(ptr,type,member) ({\
 (type*)((char*)ptr-(size_t)(&((type*)0)->member));\
 })

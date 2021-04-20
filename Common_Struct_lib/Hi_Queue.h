@@ -1,5 +1,6 @@
 
 /**
+ * 单链表的队列实现
  * 同样的,队列则是链表的尾插法使用
 */
 
@@ -21,6 +22,11 @@ struct queue_head
 #define QUEUE_HEAD(name)            \
     struct queue_head name = QUEUE_HEAD_INIT()
 
+/**
+ * @brief 数据入队
+ * @param _new      需要入队的新节点
+ * @param head      队列的头节点
+*/
 static inline void queue_push(struct queue_head *_new,
                               struct queue_head *head)
 {
@@ -32,6 +38,11 @@ static inline void queue_push(struct queue_head *_new,
     _new->hook = NULL;
 }
 
+/**
+ * @brief           数据出队
+ * @param head      队列的头节点
+ * @return          返回出队数据的节点
+*/
 static inline struct queue_head* queue_pop(struct queue_head *head)
 {
     struct queue_head* temp = head->hook;
@@ -44,6 +55,11 @@ static inline struct queue_head* queue_pop(struct queue_head *head)
     return temp;
 }
 
+/**
+ * @brief           队列判空
+ * @param head      队列的头节点
+ * @return          1:队列空 0:队列非空
+*/
 static inline int queue_empty(const struct queue_head *head)
 {
     return head->hook == NULL;

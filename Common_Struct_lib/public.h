@@ -1,4 +1,12 @@
 
+/**
+ * 队列和栈部分公用内容
+ * 这一部分是linux内核里一种高级用法
+*/
+
+
+
+
 #ifndef __PUBLIC_H__
 #define __PUBLIC_H__
 

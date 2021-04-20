@@ -34,6 +34,18 @@ static custom_data* __get_content(struct list_head *node)
     list_del(&pop_data->node_info.prior_hook);
     return pop_data;
 }
+
+
+
+/**
+ * @brief 用于求解迷宫问题
+ *        用法
+ *            1. example:电脑鼠
+ * @param maze   迷宫二维数组
+ * @param maze_size   迷宫大小
+ * @param start   起始点
+ * @param end   终点  
+*/
 void A_star(u8_t maze[][10],struct win_size maze_size, struct local_pos start, struct local_pos end)
 {
     int dis[maze_size.height][maze_size.width];

@@ -26,6 +26,12 @@ struct stack_head
 #define STACK_HEAD(name)            \
     struct stack_head name = STACK_HEAD_INIT()
 
+
+/**
+ * @brief 数据入栈
+ * @param _new      需要入栈的新节点
+ * @param top       栈顶指针
+*/
 static inline void stack_push(struct stack_head *_new,
                               struct stack_head *top)
 {
@@ -33,6 +39,11 @@ static inline void stack_push(struct stack_head *_new,
     top->hook = _new;
 }
 
+/**
+ * @brief           数据出栈
+ * @param top       栈顶
+ * @return          返回出栈数据的节点
+*/
 static inline struct stack_head* stack_pop(struct stack_head *top)
 {
     struct stack_head* temp = top->hook;
@@ -44,6 +55,12 @@ static inline struct stack_head* stack_pop(struct stack_head *top)
     return temp;
 }
 
+
+/**
+ * @brief           栈判空
+ * @param top      栈顶
+ * @return          1:队列空 0:队列非空
+*/
 static inline int stack_empty(const struct stack_head *top)
 {
     return top->hook == NULL;

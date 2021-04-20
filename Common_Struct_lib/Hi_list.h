@@ -8,6 +8,10 @@ extern "C" {
 
 #include "public.h"
 
+
+/**
+ * 双向链表
+*/
 struct list_head
 {
     struct list_head *next,*prev;

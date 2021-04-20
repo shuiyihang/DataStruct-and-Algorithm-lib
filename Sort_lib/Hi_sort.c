@@ -2,6 +2,20 @@
 #include "stdio.h"
 //通用的排序算法
 //链表里的一个参数，把链表顺序换掉
+
+
+/**
+ * @brief 常用排序算法汇总,当然尽量推荐使用快排了
+ * 分别是:
+ *          冒泡
+ *          选择
+ *          插入
+ *          快排
+ * @param data      数据
+ * @param len       数据长度
+*/
+
+
 void bubble_sort(int data[], int len)
 {
     for(int i = 0; i<len; i++){

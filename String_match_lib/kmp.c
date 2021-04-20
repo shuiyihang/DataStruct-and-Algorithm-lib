@@ -18,13 +18,15 @@ static void __get_next_info(u8_t *pat_str,int *next,int pat_str_len)
 }
 
 /**
- * @brief 在主串里查找目标串,成功返回目标串位置,失败返回-1
+ * @brief 在主串里查找目标串
  *        用法
  *            1. example:接受数据的缓冲里查找特定的起始头
- * @param pat_str   主串
+ * @param pat_str       主串
  * @param pat_str_len   主串长度
- * @param tar_str   目标串
+ * @param tar_str       目标串
  * @param tar_str_len   目标串长度  
+ * 
+ * @return 成功返回目标串位置,失败返回-1
  * 
 */
 

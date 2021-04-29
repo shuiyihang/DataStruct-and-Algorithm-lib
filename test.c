@@ -18,7 +18,12 @@
 
 #include "./String_match_lib/kmp.h"
 
-#ifdef #ifdef COMMON_STRUCT_TEST
+
+#define PRINT_MACRO_HELPER(x) #x
+#define PRINT_MACRO(x) #x"="PRINT_MACRO_HELPER(x)           //全局宏定义查看调用
+
+
+#ifdef COMMON_STRUCT_TEST
 typedef struct
 {
     int data;
@@ -50,9 +55,15 @@ u8_t pat_str[]="ababcabaaa";
 u8_t tar_str[]="abca";
 #endif
 
+
+#define adafruit_abs(a)         \
+                ({((a)<0)?(-(a)):(a);})
+
+
+
 void main()
 {
-
+    printf(">>>>%d\n",adafruit_abs(1-6));
 #ifdef KMP_TEST
     int result=kmp(pat_str,sizeof(pat_str)-1,tar_str,sizeof(tar_str)-1);
     printf("result:%d\n",result);

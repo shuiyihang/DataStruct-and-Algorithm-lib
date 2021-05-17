@@ -13,29 +13,24 @@ extern "C" {
 
 
 #include "public.h"
+#include "Hi_single_list.h"
 
-struct queue_head
-{
-    struct queue_head *hook;
-};
+
+typedef struct single_list_head    queue_head;
+
 #define QUEUE_HEAD_INIT()       {NULL}
 #define QUEUE_HEAD(name)            \
-    struct queue_head name = QUEUE_HEAD_INIT()
+    queue_head name = QUEUE_HEAD_INIT()
 
 /**
  * @brief 数据入队
  * @param _new      需要入队的新节点
  * @param head      队列的头节点
 */
-static inline void queue_push(struct queue_head *_new,
-                              struct queue_head *head)
+static inline void queue_push(queue_head *_new,
+                              queue_head *head)
 {
-    struct queue_head *temp = head;
-    while(NULL != temp->hook){
-        temp = temp->hook;
-    }
-    temp->hook = _new;
-    _new->hook = NULL;
+    single_list_add_tail(_new,head);
 }
 
 /**
@@ -43,14 +38,14 @@ static inline void queue_push(struct queue_head *_new,
  * @param head      队列的头节点
  * @return          返回出队数据的节点
 */
-static inline struct queue_head* queue_pop(struct queue_head *head)
+static inline queue_head* queue_pop(queue_head *head)
 {
-    struct queue_head* temp = head->hook;
+    queue_head* temp = head->next;
     if(NULL == temp){
         printf("queue is null\n");
         return NULL;
     }
-    head->hook = temp->hook;
+    head->next = temp->next;
 
     return temp;
 }
@@ -60,9 +55,9 @@ static inline struct queue_head* queue_pop(struct queue_head *head)
  * @param head      队列的头节点
  * @return          1:队列空 0:队列非空
 */
-static inline int queue_empty(const struct queue_head *head)
+static inline int queue_empty(const queue_head *head)
 {
-    return head->hook == NULL;
+    return head->next == NULL;
 }
 
 

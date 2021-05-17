@@ -37,7 +37,6 @@ static inline void __list_add(struct list_head *_new,
     prev->next = _new;
 }
 
-
 //尾插
 static inline void list_add_tail(struct list_head *_new, struct list_head *head)
 {
@@ -54,7 +53,6 @@ static inline void __list_del(struct list_head *prev, struct list_head *next)
 {
     next->prev = prev;
     prev->next = next;
-    
 }
 /**
  * 库里不做内存释放工作，如有需要外部定义指针变量malloc分配，free释放
@@ -62,6 +60,9 @@ static inline void __list_del(struct list_head *prev, struct list_head *next)
 */
 static inline void list_del(struct list_head *entry)
 {
+    if(entry == NULL){
+        return;
+    }
     __list_del(entry->prev, entry->next);
 }
 

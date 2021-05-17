@@ -23,14 +23,20 @@
 #define PRINT_MACRO(x) #x"="PRINT_MACRO_HELPER(x)           //全局宏定义查看调用
 
 
+#define COMMON_STRUCT_TEST
+
+
+
+
+
 #ifdef COMMON_STRUCT_TEST
 typedef struct
 {
     int data;
     char* name;
-    struct stack_head clue;
-    struct queue_head queue_clue;
-    struct list_head list_clue;
+    stack_head clue;
+    queue_head queue_clue;
+    struct single_list_head list_clue;
 }test;
 #endif
 
@@ -135,32 +141,33 @@ void main()
     five.name="five data";
 
     
-    LIST_HEAD(test_list);
-    list_add_head(&one.list_clue,&test_list);
-    list_add_head(&three.list_clue,&test_list);
-    list_add_head(&five.list_clue,&test_list);
-    list_add_head(&two.list_clue,&test_list);
+    SINGLE_LIST_HEAD(test_list);
+    single_list_add_head(&one.list_clue,&test_list);
+    single_list_add_head(&three.list_clue,&test_list);
+    single_list_add_head(&five.list_clue,&test_list);
+    single_list_add_head(&two.list_clue,&test_list);
 
     test *pos=NULL;
-    list_for_each_entry(pos,&test_list,list_clue)
+    single_list_for_each_entry(pos,&test_list,list_clue)
     {
-         printf("%d,%s\n",pos->data,pos->name);
+         printf("list_test:%d,%s\n",pos->data,pos->name);
     }
 
-
+    printf("stack start init\n");
     STACK_HEAD(test_stack);
+    printf("stack init finish\n");
     stack_push(&one.clue,&test_stack);
     stack_push(&two.clue,&test_stack);
 
     stack_push(&three.clue,&test_stack);
     stack_push(&five.clue,&test_stack);
-
-    struct stack_head* p1;
+    printf("stack inset finish\n");
+    stack_head* p1;
     while(!stack_empty(&test_stack))
     {
         p1=stack_pop(&test_stack);
         four=CONTAINER_OF(p1,test,clue);
-        printf("%d,%s\n",four->data,four->name);
+        printf("stack_test:%d,%s\n",four->data,four->name);
     }
 
     QUEUE_HEAD(test_queue);
@@ -169,12 +176,12 @@ void main()
     queue_push(&three.queue_clue,&test_queue);
     queue_push(&five.queue_clue,&test_queue);
 
-    struct queue_head* p2;
+    queue_head* p2;
     while(!queue_empty(&test_queue))
     {
         p2=queue_pop(&test_queue);
-        four=queue_entry(p2,test,queue_clue);
-        printf("%d,%s\n",four->data,four->name);
+        four=list_entry(p2,test,queue_clue);
+        printf("queue_test:%d,%s\n",four->data,four->name);
     }
 #endif
 

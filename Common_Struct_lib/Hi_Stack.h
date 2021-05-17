@@ -16,15 +16,13 @@ extern "C" {
 
 
 #include "public.h"
+#include "Hi_single_list.h"
 
 
-struct stack_head
-{
-    struct stack_head *hook;
-};
+typedef struct single_list_head    stack_head;
 #define STACK_HEAD_INIT()       {NULL}
 #define STACK_HEAD(name)            \
-    struct stack_head name = STACK_HEAD_INIT()
+    stack_head name = STACK_HEAD_INIT()
 
 
 /**
@@ -32,11 +30,10 @@ struct stack_head
  * @param _new      需要入栈的新节点
  * @param top       栈顶指针
 */
-static inline void stack_push(struct stack_head *_new,
-                              struct stack_head *top)
+static inline void stack_push(stack_head *_new,
+                              stack_head *top)
 {
-    _new->hook = top->hook;
-    top->hook = _new;
+    single_list_add_head(_new, top);
 }
 
 /**
@@ -44,14 +41,14 @@ static inline void stack_push(struct stack_head *_new,
  * @param top       栈顶
  * @return          返回出栈数据的节点
 */
-static inline struct stack_head* stack_pop(struct stack_head *top)
+static inline stack_head* stack_pop(stack_head *top)
 {
-    struct stack_head* temp = top->hook;
+    stack_head* temp = top->next;
     if(NULL == temp){
         printf("stack is null\n");
         return NULL;
     }
-    top->hook = temp->hook;
+    top->next = temp->next;
     return temp;
 }
 
@@ -61,9 +58,9 @@ static inline struct stack_head* stack_pop(struct stack_head *top)
  * @param top      栈顶
  * @return          1:队列空 0:队列非空
 */
-static inline int stack_empty(const struct stack_head *top)
+static inline int stack_empty(const stack_head *top)
 {
-    return top->hook == NULL;
+    return top->next == NULL;
 }
 
 

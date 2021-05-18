@@ -8,6 +8,8 @@
         "hi_stack.h": "c",
         "hi_graph.h": "c",
         "kmp.h": "c",
-        "public.h": "c"
+        "public.h": "c",
+        "hi_single_list.h": "c",
+        "stdlib.h": "c"
     }
 }

@@ -244,7 +244,9 @@ void enter_return_new_page(struct cur_indicate *cur, unsigned char mode)
     
         get_uplist_from_curlisthead(&cur_mode);
         cur_mode.cur_type = NON_LEAF;
+        cur_mode.cur_choose = 0;//注意摆放的位置
         show_curmode_ui();
+        cur->chosse_cnt = get_menu_choose_cnt(cur_mode.cur_list_head);//注意摆放的位置
         
     }
 }

@@ -39,6 +39,8 @@ typedef struct MenuItem MenuItem_Typedef;
 typedef void (*show_dir_page)(const MenuItem_Typedef *menu);
 
 typedef void (*show_leaf_page)(const MenuItem_Typedef *leaf);
+
+typedef void (*leaf_page_keyDeal)(void);
 typedef struct MenuItem
 {
     unsigned char type;
@@ -50,7 +52,26 @@ typedef struct MenuItem
         show_dir_page   showMenu;
         show_leaf_page  showPage;
     };
+    leaf_page_keyDeal page_reply;
 }MenuItem_Typedef;
+
+
+
+
+typedef struct configSet
+{
+    unsigned char need_refresh;//是否需要刷屏
+    unsigned char bt_state;//蓝牙开关状态
+    unsigned char correct_state;//自动改正开关
+    unsigned char oneHandle_state;//单手状态
+
+}configSet_Typedef;
+
+
+configSet_Typedef *operat_config;
+
+
+
 
 enum{
     LEAF=1,
@@ -85,7 +106,7 @@ void simulate_show_list_page(const MenuItem_Typedef *menu)//由非叶子节点�
     const struct single_list_head *list_node = &menu->localPos;
     MenuItem_Typedef *temp;
     unsigned char cnt = 0;
-    printf("====%s====\t\n",menu->brief_info);
+    printf("======%s======\t\n",menu->brief_info);
     single_list_for_each_entry(temp,list_node,brother)
     {
         if(cnt == cur_mode.cur_choose)
@@ -96,6 +117,110 @@ void simulate_show_list_page(const MenuItem_Typedef *menu)//由非叶子节点�
     }
     printf("================\t\n");
 }
+
+/**
+ * 
+ * 以下仅为界面的测试,与核心无关
+*/
+
+void blueTooth_page_deal()
+{
+    operat_config->bt_state = ~operat_config->bt_state;
+    operat_config->need_refresh = 1;
+}
+void blueTooth_page(const MenuItem_Typedef *leaf)
+{
+    printf("======%s======\n",leaf->brief_info);
+    if(operat_config->bt_state)
+        printf("[蓝牙:         开]\n");
+    else
+        printf("[蓝牙:         关]\n");
+    printf("===================\n");
+}
+
+
+void aboutPhone_page(const MenuItem_Typedef *leaf)
+{
+    printf("======%s======\n",leaf->brief_info);
+    printf("[名称:      蝴蝶与猫]\n");
+    printf("[软件版本:  14.5.1]\n");
+    printf("[运营商:    中国电信]\n");
+    printf("====================\n");
+}
+
+void autoCorrct_page_deal()
+{
+    operat_config->correct_state = ~operat_config->correct_state;
+    operat_config->need_refresh = 1;
+}
+void autoCorrect_page(const MenuItem_Typedef *leaf)
+{
+    printf("=====%s=====\n",leaf->brief_info);
+    if(operat_config->correct_state)
+        printf("[自动改正:      开]\n");
+    else
+        printf("[自动改正:      关]\n");
+    printf("==================\n");
+}
+
+
+void oneHandle_page_deal()
+{
+    operat_config->oneHandle_state = (++operat_config->oneHandle_state)%3;
+    operat_config->need_refresh = 1;
+}
+void oneHandle_page(const MenuItem_Typedef *leaf)
+{
+    printf("=====%s=====\n",leaf->brief_info);
+
+    switch (operat_config->oneHandle_state)
+    {
+    case 0:
+        printf("[关:          √ ]\n");
+        printf("[左:            ]\n");
+        printf("[右:            ]\n");
+        break;
+    case 1:
+        printf("[关:            ]\n");
+        printf("[左:          √ ]\n");
+        printf("[右:            ]\n");
+        break;
+    
+    case 2:
+        printf("[关:            ]\n");
+        printf("[左:            ]\n");
+        printf("[右:          √ ]\n");
+        break;
+    
+    default:
+        break;
+    }
+    printf("==================\n");
+}
+
+void glide_page_deal()
+{
+    operat_config->correct_state = ~operat_config->correct_state;
+    operat_config->need_refresh = 1;
+}
+void glideType(const MenuItem_Typedef *leaf)
+{
+    printf("======%s======\n",leaf->brief_info);
+    if(operat_config->correct_state)
+        printf("[滑行键入:        开]\n");
+    else    
+        printf("[滑行键入:        关]\n");
+    printf("====================\n");
+}
+
+
+
+
+
+
+
+
+
 
 
 //建树
@@ -158,6 +283,7 @@ void refresh_cur_interface(void)
     MenuItem_Typedef *pos;
     struct single_list_head *ptr = cur_mode.cur_list_head;
 
+    system("clear");
     pos = list_entry(ptr,MenuItem_Typedef,localPos);
     if(pos->type == LEAF){
         cur_mode.cur_type = LEAF;
@@ -175,17 +301,23 @@ void enter_return_new_page(struct cur_indicate *cur, unsigned char mode)
     unsigned char cnt = 0;
     struct single_list_head *ptr = cur->cur_list_head;
     if(mode == ENTER_PAGE){
-        single_list_for_each_entry(pos,ptr,brother)
-        {
-            if(cnt == cur->cur_choose){
-                cur->cur_choose = 0;//注意摆放的位置
-                cur->cur_list_head = &pos->localPos;//重新初始list
-                
-                cur->chosse_cnt = get_menu_choose_cnt();//注意摆放的位置
-                break;
+        if(ptr->next){//非空进入下一个页面
+            single_list_for_each_entry(pos,ptr,brother)
+            {
+                if(cnt == cur->cur_choose){
+                    cur->cur_choose = 0;//注意摆放的位置
+                    cur->cur_list_head = &pos->localPos;//重新初始list
+                    
+                    cur->chosse_cnt = get_menu_choose_cnt();//注意摆放的位置
+                    break;
+                }
+                cnt++;
             }
-            cnt++;
+        }else{//就是子页面上的确定取消操作了
+            pos = list_entry(ptr,MenuItem_Typedef,localPos);
+            pos->page_reply();
         }
+        
     }else{//返回上一级
         get_uplist_from_curlisthead(cur);
     }
@@ -209,7 +341,7 @@ MenuItem_Typedef* non_leaf_create(const char *text, show_dir_page cb)
     return non_leaf;
 } 
 
-MenuItem_Typedef* leaf_create(const char *text, show_leaf_page cb)
+MenuItem_Typedef* leaf_create(const char *text, show_leaf_page cb , leaf_page_keyDeal deal)
 {
     MenuItem_Typedef* leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(leaf == NULL){
@@ -217,6 +349,7 @@ MenuItem_Typedef* leaf_create(const char *text, show_leaf_page cb)
     }
     memset(leaf,0,sizeof(MenuItem_Typedef));
     leaf->showPage = cb;
+    leaf->page_reply = deal;
     leaf->type = LEAF;
     leaf->brief_info = text;
 
@@ -232,13 +365,13 @@ void free_branch_auto(MenuItem_Typedef* non_lef)
     
     single_list_for_each_entry(temp,ptr,brother){
         if(temp->type == LEAF){
-            printf("free leaf:%s\n",temp->brief_info);
+            // printf("free leaf:%s\n",temp->brief_info);
             free(temp);
         }else{
             free_branch_auto(temp);
         }
     }
-    printf("free non_leaf:%s\n",non_lef->brief_info);
+    // printf("free non_leaf:%s\n",non_lef->brief_info);
     free(non_lef);
 }
 
@@ -262,18 +395,22 @@ void main()
     MenuItem_Typedef *third_level_two;
     MenuItem_Typedef *third_level_three;
     unsigned char cmd;
+
+    MenuItem_Typedef *deal_special_page;
     
 
+    operat_config = (configSet_Typedef*)malloc(sizeof(configSet_Typedef));
+    memset(operat_config, 0, sizeof(configSet_Typedef));
     
-    root = non_leaf_create("menu root",simulate_show_list_page);
-    first_level_one = non_leaf_create("first_level_one",simulate_show_list_page);
-    second_level_two = non_leaf_create("second_level_two",simulate_show_list_page);
+    root = non_leaf_create("设置",simulate_show_list_page);
+    first_level_one = non_leaf_create("通用",simulate_show_list_page);
+    second_level_two = non_leaf_create("键盘",simulate_show_list_page);
 
-    first_level_two = leaf_create("01",simulate_show_leaf_page);
-    second_level_one = leaf_create("000",simulate_show_leaf_page);
-    third_level_one = leaf_create("0011",simulate_show_leaf_page);
-    third_level_two = leaf_create("0000",simulate_show_leaf_page);
-    third_level_three = leaf_create("0002",simulate_show_leaf_page);
+    first_level_two = leaf_create("蓝牙",blueTooth_page, blueTooth_page_deal);
+    second_level_one = leaf_create("关于本机",aboutPhone_page,NULL);
+    third_level_one = leaf_create("自动改正",autoCorrect_page, autoCorrct_page_deal);
+    third_level_two = leaf_create("单手键盘",oneHandle_page, oneHandle_page_deal);
+    third_level_three = leaf_create("滑行键入",glideType, glide_page_deal);
 
 
     tree_node_binding_oneTime(2, root,first_level_one,first_level_two);
@@ -306,6 +443,13 @@ void main()
                     cur_mode.cur_choose = cur_mode.chosse_cnt - 1;
                 }
                 refresh_cur_interface();
+            }else{
+                deal_special_page = list_entry(cur_mode.cur_list_head,MenuItem_Typedef,localPos);
+                if(deal_special_page->page_reply){
+                    deal_special_page->page_reply();
+                    operat_config->need_refresh = 1;
+                }
+                    
             }
             break;
         case 'a'://返回
@@ -316,9 +460,16 @@ void main()
             {
                 cur_mode.cur_choose = (++cur_mode.cur_choose)%cur_mode.chosse_cnt;
                 refresh_cur_interface();
+            }else{
+                deal_special_page = list_entry(cur_mode.cur_list_head,MenuItem_Typedef,localPos);
+                if(deal_special_page->page_reply){
+                    deal_special_page->page_reply();
+                    operat_config->need_refresh = 1;
+                }
+                
             }
             break;
-        case 'd'://进入
+        case 'd'://进入 确认按键
             enter_return_new_page(&cur_mode,ENTER_PAGE);
             break;
         default:
@@ -329,10 +480,16 @@ void main()
         }
         cmd = 'l';
 
+        if(operat_config->need_refresh){
+            operat_config->need_refresh = 0;
+            refresh_cur_interface();
+        }
+
 
     }
 
     free_branch_auto(root);
+    free(operat_config);
 }
 
 

@@ -45,7 +45,7 @@ typedef struct node_type_name
     unsigned char type;
     struct single_list_head local_pos;//绑定子目录的头节点
     struct single_list_head hook;
-    struct single_list_head parent_ptr;
+    struct single_list_head *parentPtr;
 }node_type_name;
 
 typedef struct leaf_accept
@@ -125,7 +125,7 @@ void simulate_show_list_page(const menu_non_leaf *menu)//由非叶子节点调�
 void tree_node_bingding_by_ps(node_type_name *non_leaf,node_type_name *leaf)
 {
     single_list_add_tail(&leaf->hook,&non_leaf->local_pos);
-    leaf->parent_ptr.next = &non_leaf->local_pos;
+    leaf->parentPtr = &non_leaf->local_pos;
 }
 
 
@@ -149,15 +149,15 @@ unsigned char get_uplist_from_curlisthead(struct cur_indicate *curmode)
     struct single_list_head *ptr = curmode->cur_list_head;
     pos = list_entry(ptr,node_type_name,local_pos);
 
-    if(pos->parent_ptr.next == NULL){
+    if(pos->parentPtr == NULL){
         return False;
     }
     if(pos->type == LEAF){
         leaf_ui = list_entry(pos,menu_leaf,page_type);
-        curmode->cur_list_head = leaf_ui->page_type.parent_ptr.next;//更新当前界面的指向
+        curmode->cur_list_head = leaf_ui->page_type.parentPtr;//更新当前界面的指向
     }else{
         contain_ui = list_entry(pos,menu_non_leaf,page_type);
-        curmode->cur_list_head = contain_ui->page_type.parent_ptr.next;
+        curmode->cur_list_head = contain_ui->page_type.parentPtr;
     }
     return True;
 }
@@ -235,7 +235,7 @@ menu_non_leaf* non_leaf_create(const char *text, show_dir_page cb)
     non_leaf->brief_info = text;
     non_leaf->page_type.type = NON_LEAF;
     non_leaf->page_deal = cb;
-    non_leaf->page_type.parent_ptr.next = NULL;
+    non_leaf->page_type.parentPtr = NULL;
 
     return non_leaf;
 } 

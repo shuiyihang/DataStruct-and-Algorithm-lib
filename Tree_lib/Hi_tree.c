@@ -12,7 +12,7 @@
 #include "stdlib.h"
 #include "stdio.h"
 #include "string.h"
-
+#include "stdarg.h"
 
 #define True    1
 #define False   0
@@ -44,8 +44,8 @@ typedef struct node_type_name
 {
     unsigned char type;
     const char *brief_info;
-    struct single_list_head local_pos;//绑定子目录的头节点
-    struct single_list_head hook;
+    struct single_list_head  localPos;//绑定子目录的头节点
+    struct single_list_head  brother;
     struct single_list_head *parentPtr;
 }node_type_name;
 
@@ -88,14 +88,14 @@ void simulate_show_leaf_page(const menu_leaf *leaf)
     printf("================\n");
 }
 
-//只做显示处理,并不希望有人改变
+//只做显示处理,并不希望改变
 void simulate_show_list_page(const menu_non_leaf *menu)//由非叶子节点调用，显示子页面内容
 {
-    const struct single_list_head *list_node = &menu->page_type.local_pos;
+    const struct single_list_head *list_node = &menu->page_type.localPos;
     node_type_name *temp;
     unsigned char cnt = 0;
     printf("========%s========\t\n",menu->page_type.brief_info);
-    single_list_for_each_entry(temp,list_node,hook)
+    single_list_for_each_entry(temp,list_node,brother)
     {
         if(cnt == cur_mode.cur_choose)
             printf("==>:%s\t\n",temp->brief_info);
@@ -112,8 +112,23 @@ void simulate_show_list_page(const menu_non_leaf *menu)//由非叶子节点调�
 
 void tree_node_bingding_by_ps(node_type_name *non_leaf,node_type_name *leaf)
 {
-    single_list_add_tail(&leaf->hook,&non_leaf->local_pos);
-    leaf->parentPtr = &non_leaf->local_pos;
+    single_list_add_tail(&leaf->brother,&non_leaf->localPos);
+    leaf->parentPtr = &non_leaf->localPos;
+}
+
+//通过不定参数一次性绑定
+void tree_node_binding_oneTime(int cnt, node_type_name *non_leaf,...)
+{
+    va_list argPtr;
+    node_type_name *temp;
+    va_start(argPtr,non_leaf);
+    while(cnt--)
+    {
+        temp = va_arg(argPtr,node_type_name *);
+        single_list_add_tail(&temp->brother,&non_leaf->localPos);
+        temp->parentPtr = &non_leaf->localPos;
+    }
+    va_end(argPtr);
 }
 
 
@@ -133,7 +148,7 @@ unsigned char get_uplist_from_curlisthead(struct cur_indicate *curmode)
 {
     node_type_name *pos;
     struct single_list_head *ptr = curmode->cur_list_head;
-    pos = list_entry(ptr,node_type_name,local_pos);
+    pos = list_entry(ptr,node_type_name,localPos);
 
     if(pos->parentPtr == NULL){
         return False;
@@ -154,7 +169,7 @@ void refresh_cur_interface(void)
     menu_non_leaf *contain_ui;
     struct single_list_head *ptr = cur_mode.cur_list_head;
 
-    pos = list_entry(ptr,node_type_name,local_pos);
+    pos = list_entry(ptr,node_type_name,localPos);
     if(pos->type == LEAF){
         cur_mode.cur_type = LEAF;
         leaf_ui = list_entry(pos,menu_leaf,page_type);
@@ -173,11 +188,11 @@ void enter_return_new_page(struct cur_indicate *cur, unsigned char mode)
     unsigned char cnt = 0;
     struct single_list_head *ptr = cur->cur_list_head;
     if(mode == ENTER_PAGE){
-        single_list_for_each_entry(pos,ptr,hook)
+        single_list_for_each_entry(pos,ptr,brother)
         {
             if(cnt == cur->cur_choose){
                 cur->cur_choose = 0;//注意摆放的位置
-                cur->cur_list_head = &pos->local_pos;//重新初始list
+                cur->cur_list_head = &pos->localPos;//重新初始list
                 
                 cur->chosse_cnt = get_menu_choose_cnt();//注意摆放的位置
                 break;
@@ -226,12 +241,12 @@ menu_leaf* leaf_create(const char *text, show_leaf_page cb)
 
 void free_branch_auto(menu_non_leaf* non_lef)
 {
-    struct single_list_head *ptr = &non_lef->page_type.local_pos;
+    struct single_list_head *ptr = &non_lef->page_type.localPos;
     node_type_name *temp;
     menu_leaf *leaf_ui;
     menu_non_leaf *contain_ui;
     
-    single_list_for_each_entry(temp,ptr,hook){
+    single_list_for_each_entry(temp,ptr,brother){
         if(temp->type == LEAF){
             leaf_ui = list_entry(temp,menu_leaf,page_type);
             printf("free leaf:%s\n",leaf_ui->page_type.brief_info);
@@ -279,19 +294,14 @@ void main()
     third_level_three = leaf_create("0002",simulate_show_leaf_page);
 
 
-    tree_node_bingding_by_ps(&root->page_type,&first_level_one->page_type);
-    tree_node_bingding_by_ps(&root->page_type,&first_level_two->page_type);
+    tree_node_binding_oneTime(2, &root->page_type,&first_level_one->page_type,&first_level_two->page_type);
 
-    
+    tree_node_binding_oneTime(2, &first_level_one->page_type,&second_level_one->page_type,&second_level_two->page_type);
 
-    tree_node_bingding_by_ps(&first_level_one->page_type,&second_level_one->page_type);
-    tree_node_bingding_by_ps(&first_level_one->page_type,&second_level_two->page_type);
+    tree_node_binding_oneTime(3, &second_level_two->page_type,&third_level_one->page_type,
+                                &third_level_two->page_type,&third_level_three->page_type);
 
-    tree_node_bingding_by_ps(&second_level_two->page_type,&third_level_one->page_type);
-    tree_node_bingding_by_ps(&second_level_two->page_type,&third_level_two->page_type);
-    tree_node_bingding_by_ps(&second_level_two->page_type,&third_level_three->page_type);
-
-    cur_mode.cur_list_head = &root->page_type.local_pos;
+    cur_mode.cur_list_head = &root->page_type.localPos;
     cur_mode.cur_type = NON_LEAF;
     cur_mode.cur_choose = 0;
     cur_mode.chosse_cnt = get_menu_choose_cnt();

@@ -34,32 +34,23 @@ typedef struct
 #define bt_max_size     10
 //一些遍历的demo
 
-typedef struct leaf_accept menu_non_leaf;
-typedef struct leaf_node menu_leaf;
+typedef struct MenuItem MenuItem_Typedef;
 
-typedef void (*show_dir_page)(const menu_non_leaf *menu);
+typedef void (*show_dir_page)(const MenuItem_Typedef *menu);
 
-typedef void (*show_leaf_page)(const menu_leaf *leaf);
-typedef struct node_type_name
+typedef void (*show_leaf_page)(const MenuItem_Typedef *leaf);
+typedef struct MenuItem
 {
     unsigned char type;
     const char *brief_info;
     struct single_list_head  localPos;//绑定子目录的头节点
     struct single_list_head  brother;
     struct single_list_head *parentPtr;
-}node_type_name;
-
-typedef struct leaf_accept
-{
-    node_type_name page_type;
-    show_dir_page page_deal;
-}menu_non_leaf;
-
-typedef struct leaf_node
-{
-    node_type_name page_type;
-    show_leaf_page page_deal;
-}menu_leaf;
+    union{
+        show_dir_page   showMenu;
+        show_leaf_page  showPage;
+    };
+}MenuItem_Typedef;
 
 enum{
     LEAF=1,
@@ -81,20 +72,20 @@ struct cur_indicate
 
 struct cur_indicate cur_mode;
 
-void simulate_show_leaf_page(const menu_leaf *leaf)
+void simulate_show_leaf_page(const MenuItem_Typedef *leaf)
 {
     printf("================\n");
-    printf("[   %s  ]\n",leaf->page_type.brief_info);
+    printf("[   %s  ]\n",leaf->brief_info);
     printf("================\n");
 }
 
 //只做显示处理,并不希望改变
-void simulate_show_list_page(const menu_non_leaf *menu)//由非叶子节点调用，显示子页面内容
+void simulate_show_list_page(const MenuItem_Typedef *menu)//由非叶子节点调用，显示子页面内容
 {
-    const struct single_list_head *list_node = &menu->page_type.localPos;
-    node_type_name *temp;
+    const struct single_list_head *list_node = &menu->localPos;
+    MenuItem_Typedef *temp;
     unsigned char cnt = 0;
-    printf("========%s========\t\n",menu->page_type.brief_info);
+    printf("====%s====\t\n",menu->brief_info);
     single_list_for_each_entry(temp,list_node,brother)
     {
         if(cnt == cur_mode.cur_choose)
@@ -110,21 +101,21 @@ void simulate_show_list_page(const menu_non_leaf *menu)//由非叶子节点调�
 //建树
 //通过指定父亲和儿子来构件关系
 
-void tree_node_bingding_by_ps(node_type_name *non_leaf,node_type_name *leaf)
+void tree_node_bingding_by_ps(MenuItem_Typedef *non_leaf,MenuItem_Typedef *leaf)
 {
     single_list_add_tail(&leaf->brother,&non_leaf->localPos);
     leaf->parentPtr = &non_leaf->localPos;
 }
 
 //通过不定参数一次性绑定
-void tree_node_binding_oneTime(int cnt, node_type_name *non_leaf,...)
+void tree_node_binding_oneTime(int cnt, MenuItem_Typedef *non_leaf,...)
 {
     va_list argPtr;
-    node_type_name *temp;
+    MenuItem_Typedef *temp;
     va_start(argPtr,non_leaf);
     while(cnt--)
     {
-        temp = va_arg(argPtr,node_type_name *);
+        temp = va_arg(argPtr,MenuItem_Typedef *);
         single_list_add_tail(&temp->brother,&non_leaf->localPos);
         temp->parentPtr = &non_leaf->localPos;
     }
@@ -146,9 +137,9 @@ unsigned char get_menu_choose_cnt()
 
 unsigned char get_uplist_from_curlisthead(struct cur_indicate *curmode)
 {
-    node_type_name *pos;
+    MenuItem_Typedef *pos;
     struct single_list_head *ptr = curmode->cur_list_head;
-    pos = list_entry(ptr,node_type_name,localPos);
+    pos = list_entry(ptr,MenuItem_Typedef,localPos);
 
     if(pos->parentPtr == NULL){
         return False;
@@ -164,27 +155,23 @@ unsigned char get_uplist_from_curlisthead(struct cur_indicate *curmode)
 
 void refresh_cur_interface(void)
 {
-    node_type_name *pos;
-    menu_leaf *leaf_ui;
-    menu_non_leaf *contain_ui;
+    MenuItem_Typedef *pos;
     struct single_list_head *ptr = cur_mode.cur_list_head;
 
-    pos = list_entry(ptr,node_type_name,localPos);
+    pos = list_entry(ptr,MenuItem_Typedef,localPos);
     if(pos->type == LEAF){
         cur_mode.cur_type = LEAF;
-        leaf_ui = list_entry(pos,menu_leaf,page_type);
-        leaf_ui->page_deal(leaf_ui);
+        pos->showPage(pos);
     }else if(pos->type == NON_LEAF){
         cur_mode.cur_type = NON_LEAF;
-        contain_ui = list_entry(pos,menu_non_leaf,page_type);
-        contain_ui->page_deal(contain_ui);
+        pos->showMenu(pos);
     }
 }
 
 
 void enter_return_new_page(struct cur_indicate *cur, unsigned char mode)
 {
-    node_type_name *pos;
+    MenuItem_Typedef *pos;
     unsigned char cnt = 0;
     struct single_list_head *ptr = cur->cur_list_head;
     if(mode == ENTER_PAGE){
@@ -208,55 +195,50 @@ void enter_return_new_page(struct cur_indicate *cur, unsigned char mode)
 
 
 
-menu_non_leaf* non_leaf_create(const char *text, show_dir_page cb)
+MenuItem_Typedef* non_leaf_create(const char *text, show_dir_page cb)
 {
-    menu_non_leaf* non_leaf = (menu_non_leaf*)malloc(sizeof(menu_non_leaf));
+    MenuItem_Typedef* non_leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(non_leaf == NULL){
         return NULL;
     }
-    memset(non_leaf,0,sizeof(menu_non_leaf));
-    non_leaf->page_type.brief_info = text;
-    non_leaf->page_type.type = NON_LEAF;
-    non_leaf->page_deal = cb;
-    non_leaf->page_type.parentPtr = NULL;
+    memset(non_leaf,0,sizeof(MenuItem_Typedef));
+    non_leaf->brief_info = text;
+    non_leaf->type = NON_LEAF;
+    non_leaf->showMenu = cb;
 
     return non_leaf;
 } 
 
-menu_leaf* leaf_create(const char *text, show_leaf_page cb)
+MenuItem_Typedef* leaf_create(const char *text, show_leaf_page cb)
 {
-    menu_leaf* leaf = (menu_leaf*)malloc(sizeof(menu_leaf));
+    MenuItem_Typedef* leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(leaf == NULL){
         return NULL;
     }
-    memset(leaf,0,sizeof(menu_leaf));
-    leaf->page_deal = cb;
-    leaf->page_type.type = LEAF;
-    leaf->page_type.brief_info = text;
+    memset(leaf,0,sizeof(MenuItem_Typedef));
+    leaf->showPage = cb;
+    leaf->type = LEAF;
+    leaf->brief_info = text;
 
     return leaf;
 }
 
 
 
-void free_branch_auto(menu_non_leaf* non_lef)
+void free_branch_auto(MenuItem_Typedef* non_lef)
 {
-    struct single_list_head *ptr = &non_lef->page_type.localPos;
-    node_type_name *temp;
-    menu_leaf *leaf_ui;
-    menu_non_leaf *contain_ui;
+    struct single_list_head *ptr = &non_lef->localPos;
+    MenuItem_Typedef *temp;
     
     single_list_for_each_entry(temp,ptr,brother){
         if(temp->type == LEAF){
-            leaf_ui = list_entry(temp,menu_leaf,page_type);
-            printf("free leaf:%s\n",leaf_ui->page_type.brief_info);
-            free(leaf_ui);
+            printf("free leaf:%s\n",temp->brief_info);
+            free(temp);
         }else{
-            contain_ui = list_entry(temp,menu_non_leaf,page_type);
-            free_branch_auto(contain_ui);
+            free_branch_auto(temp);
         }
     }
-    printf("free non_leaf:%s\n",non_lef->page_type.brief_info);
+    printf("free non_leaf:%s\n",non_lef->brief_info);
     free(non_lef);
 }
 
@@ -271,14 +253,14 @@ void free_branch_auto(menu_non_leaf* non_lef)
 
 void main()
 {
-    menu_non_leaf *root;
-    menu_non_leaf *first_level_one;
-    menu_leaf *first_level_two;
-    menu_leaf *second_level_one;
-    menu_non_leaf *second_level_two;
-    menu_leaf *third_level_one;
-    menu_leaf *third_level_two;
-    menu_leaf *third_level_three;
+    MenuItem_Typedef *root;
+    MenuItem_Typedef *first_level_one;
+    MenuItem_Typedef *first_level_two;
+    MenuItem_Typedef *second_level_one;
+    MenuItem_Typedef *second_level_two;
+    MenuItem_Typedef *third_level_one;
+    MenuItem_Typedef *third_level_two;
+    MenuItem_Typedef *third_level_three;
     unsigned char cmd;
     
 
@@ -294,14 +276,14 @@ void main()
     third_level_three = leaf_create("0002",simulate_show_leaf_page);
 
 
-    tree_node_binding_oneTime(2, &root->page_type,&first_level_one->page_type,&first_level_two->page_type);
+    tree_node_binding_oneTime(2, root,first_level_one,first_level_two);
 
-    tree_node_binding_oneTime(2, &first_level_one->page_type,&second_level_one->page_type,&second_level_two->page_type);
+    tree_node_binding_oneTime(2, first_level_one,second_level_one,second_level_two);
 
-    tree_node_binding_oneTime(3, &second_level_two->page_type,&third_level_one->page_type,
-                                &third_level_two->page_type,&third_level_three->page_type);
+    tree_node_binding_oneTime(3, second_level_two,third_level_one,
+                                third_level_two,third_level_three);
 
-    cur_mode.cur_list_head = &root->page_type.localPos;
+    cur_mode.cur_list_head = &root->localPos;
     cur_mode.cur_type = NON_LEAF;
     cur_mode.cur_choose = 0;
     cur_mode.chosse_cnt = get_menu_choose_cnt();

@@ -11,7 +11,7 @@
 extern "C" {
 #endif
 
-
+#include "stdio.h"
 #include "public.h"
 #include "Hi_single_list.h"
 

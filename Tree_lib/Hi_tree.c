@@ -43,6 +43,7 @@ typedef void (*show_leaf_page)(const menu_leaf *leaf);
 typedef struct node_type_name
 {
     unsigned char type;
+    const char *brief_info;
     struct single_list_head local_pos;//绑定子目录的头节点
     struct single_list_head hook;
     struct single_list_head *parentPtr;
@@ -50,14 +51,12 @@ typedef struct node_type_name
 
 typedef struct leaf_accept
 {
-    const char *brief_info;
     node_type_name page_type;
     show_dir_page page_deal;
 }menu_non_leaf;
 
 typedef struct leaf_node
 {
-    const char *brief_info;
     node_type_name page_type;
     show_leaf_page page_deal;
 }menu_leaf;
@@ -77,7 +76,7 @@ struct cur_indicate
     unsigned char cur_type;
     unsigned char chosse_cnt;
     char cur_choose;
-    struct single_list_head *cur_list_head;
+    struct single_list_head *cur_list_head;//指向菜单的头节点
 };
 
 struct cur_indicate cur_mode;
@@ -85,7 +84,7 @@ struct cur_indicate cur_mode;
 void simulate_show_leaf_page(const menu_leaf *leaf)
 {
     printf("================\n");
-    printf("[   %s  ]\n",leaf->brief_info);
+    printf("[   %s  ]\n",leaf->page_type.brief_info);
     printf("================\n");
 }
 
@@ -94,25 +93,14 @@ void simulate_show_list_page(const menu_non_leaf *menu)//由非叶子节点调�
 {
     const struct single_list_head *list_node = &menu->page_type.local_pos;
     node_type_name *temp;
-    menu_leaf *leaf_ui;
-    menu_non_leaf *contain_ui;
     unsigned char cnt = 0;
-    printf("========%s========\t\n",menu->brief_info);
+    printf("========%s========\t\n",menu->page_type.brief_info);
     single_list_for_each_entry(temp,list_node,hook)
     {
-        if(temp->type == LEAF){
-            leaf_ui = list_entry(temp,menu_leaf,page_type);
-            if(cnt == cur_mode.cur_choose)
-            printf("==>:%s\t\n",leaf_ui->brief_info);
-            else
-            printf("    %s\t\n",leaf_ui->brief_info);
-        }else if(temp->type == NON_LEAF){
-            contain_ui = list_entry(temp,menu_non_leaf,page_type);
-            if(cnt == cur_mode.cur_choose)
-            printf("==>:%s\t\n",contain_ui->brief_info);
-            else
-            printf("    %s\t\n",contain_ui->brief_info);
-        }
+        if(cnt == cur_mode.cur_choose)
+            printf("==>:%s\t\n",temp->brief_info);
+        else
+            printf("    %s\t\n",temp->brief_info);
         cnt++;
     }
     printf("================\t\n");
@@ -130,10 +118,10 @@ void tree_node_bingding_by_ps(node_type_name *non_leaf,node_type_name *leaf)
 
 
 
-unsigned char get_menu_choose_cnt(struct single_list_head *ptr)
+unsigned char get_menu_choose_cnt()
 {
     unsigned char cnt=0;
-    struct single_list_head* temp = ptr->next;
+    struct single_list_head* temp = cur_mode.cur_list_head->next;
     while(temp){
         cnt++;
         temp = temp->next;
@@ -144,21 +132,15 @@ unsigned char get_menu_choose_cnt(struct single_list_head *ptr)
 unsigned char get_uplist_from_curlisthead(struct cur_indicate *curmode)
 {
     node_type_name *pos;
-    menu_non_leaf *contain_ui;
-    menu_leaf *leaf_ui;
     struct single_list_head *ptr = curmode->cur_list_head;
     pos = list_entry(ptr,node_type_name,local_pos);
 
     if(pos->parentPtr == NULL){
         return False;
     }
-    if(pos->type == LEAF){
-        leaf_ui = list_entry(pos,menu_leaf,page_type);
-        curmode->cur_list_head = leaf_ui->page_type.parentPtr;//更新当前界面的指向
-    }else{
-        contain_ui = list_entry(pos,menu_non_leaf,page_type);
-        curmode->cur_list_head = contain_ui->page_type.parentPtr;
-    }
+    curmode->cur_list_head = pos->parentPtr;
+    curmode->cur_choose = 0;//注意摆放的位置
+    curmode->chosse_cnt = get_menu_choose_cnt();//注意摆放的位置
     return True;
 }
 
@@ -174,9 +156,11 @@ void refresh_cur_interface(void)
 
     pos = list_entry(ptr,node_type_name,local_pos);
     if(pos->type == LEAF){
+        cur_mode.cur_type = LEAF;
         leaf_ui = list_entry(pos,menu_leaf,page_type);
         leaf_ui->page_deal(leaf_ui);
     }else if(pos->type == NON_LEAF){
+        cur_mode.cur_type = NON_LEAF;
         contain_ui = list_entry(pos,menu_non_leaf,page_type);
         contain_ui->page_deal(contain_ui);
     }
@@ -187,40 +171,24 @@ void enter_return_new_page(struct cur_indicate *cur, unsigned char mode)
 {
     node_type_name *pos;
     unsigned char cnt = 0;
-    menu_leaf *leaf_ui;
-    menu_non_leaf *contain_ui;
     struct single_list_head *ptr = cur->cur_list_head;
     if(mode == ENTER_PAGE){
         single_list_for_each_entry(pos,ptr,hook)
         {
             if(cnt == cur->cur_choose){
-                cur_mode.cur_choose = 0;//注意摆放的位置
-                if(pos->type == LEAF){
-                    leaf_ui = list_entry(pos,menu_leaf,page_type);
-                    leaf_ui->page_deal(leaf_ui);//这里要画图，所以要提前清零choose
-                    cur_mode.cur_type = LEAF;
-                    cur_mode.cur_list_head = &leaf_ui->page_type.local_pos;//重新初始list
-                }else if(pos->type == NON_LEAF){
-                    contain_ui = list_entry(pos,menu_non_leaf,page_type);
-                    contain_ui->page_deal(contain_ui);
-                    cur_mode.cur_type = NON_LEAF;
-                    cur_mode.cur_list_head = &contain_ui->page_type.local_pos;
-                }
-                cur->chosse_cnt = get_menu_choose_cnt(cur_mode.cur_list_head);//注意摆放的位置
+                cur->cur_choose = 0;//注意摆放的位置
+                cur->cur_list_head = &pos->local_pos;//重新初始list
+                
+                cur->chosse_cnt = get_menu_choose_cnt();//注意摆放的位置
                 break;
             }
             cnt++;
         }
     }else{//返回上一级
-    
-        if(get_uplist_from_curlisthead(&cur_mode) == True)
-        {
-            cur_mode.cur_type = NON_LEAF;
-            cur_mode.cur_choose = 0;//注意摆放的位置
-            refresh_cur_interface();
-            cur->chosse_cnt = get_menu_choose_cnt(cur_mode.cur_list_head);//注意摆放的位置
-        }
+        get_uplist_from_curlisthead(cur);
     }
+
+    refresh_cur_interface();
 }
 
 
@@ -232,7 +200,7 @@ menu_non_leaf* non_leaf_create(const char *text, show_dir_page cb)
         return NULL;
     }
     memset(non_leaf,0,sizeof(menu_non_leaf));
-    non_leaf->brief_info = text;
+    non_leaf->page_type.brief_info = text;
     non_leaf->page_type.type = NON_LEAF;
     non_leaf->page_deal = cb;
     non_leaf->page_type.parentPtr = NULL;
@@ -249,7 +217,7 @@ menu_leaf* leaf_create(const char *text, show_leaf_page cb)
     memset(leaf,0,sizeof(menu_leaf));
     leaf->page_deal = cb;
     leaf->page_type.type = LEAF;
-    leaf->brief_info = text;
+    leaf->page_type.brief_info = text;
 
     return leaf;
 }
@@ -266,14 +234,14 @@ void free_branch_auto(menu_non_leaf* non_lef)
     single_list_for_each_entry(temp,ptr,hook){
         if(temp->type == LEAF){
             leaf_ui = list_entry(temp,menu_leaf,page_type);
-            printf("free leaf:%s\n",leaf_ui->brief_info);
+            printf("free leaf:%s\n",leaf_ui->page_type.brief_info);
             free(leaf_ui);
         }else{
             contain_ui = list_entry(temp,menu_non_leaf,page_type);
             free_branch_auto(contain_ui);
         }
     }
-    printf("free non_leaf:%s\n",non_lef->brief_info);
+    printf("free non_leaf:%s\n",non_lef->page_type.brief_info);
     free(non_lef);
 }
 
@@ -281,6 +249,8 @@ void free_branch_auto(menu_non_leaf* non_lef)
 /**
  * 测试菜单类型
  * 
+ * 1. 需要再检查代表当前的cur_mode类型简化，能不能不独立出这个单独类型
+ * 2. 绑定时候能不能再优雅些
 */
 
 
@@ -324,48 +294,48 @@ void main()
     cur_mode.cur_list_head = &root->page_type.local_pos;
     cur_mode.cur_type = NON_LEAF;
     cur_mode.cur_choose = 0;
-    cur_mode.chosse_cnt = get_menu_choose_cnt(cur_mode.cur_list_head);
+    cur_mode.chosse_cnt = get_menu_choose_cnt();
 
 
     refresh_cur_interface();
 
     while(1)
     {
-            cmd = getchar();
-            system("stty echo");
-            switch (cmd)
+        cmd = getchar();
+        system("stty echo");
+        switch (cmd)
+        {
+        case 'w'://光标向上
+            if(cur_mode.cur_type == NON_LEAF)
             {
-            case 'w'://光标向上
-                if(cur_mode.cur_type == NON_LEAF)
+                cur_mode.cur_choose--;
+                if(cur_mode.cur_choose<0)
                 {
-                    cur_mode.cur_choose--;
-                    if(cur_mode.cur_choose<0)
-                    {
-                        cur_mode.cur_choose = cur_mode.chosse_cnt - 1;
-                    }
-                    refresh_cur_interface();
+                    cur_mode.cur_choose = cur_mode.chosse_cnt - 1;
                 }
-                break;
-            case 'a'://返回
-                enter_return_new_page(&cur_mode,RETURN_PAGE);
-                break;
-            case 's'://光标向下
-                if(cur_mode.cur_type == NON_LEAF)
-                {
-                    cur_mode.cur_choose = (++cur_mode.cur_choose)%cur_mode.chosse_cnt;
-                    refresh_cur_interface();
-                }
-                break;
-            case 'd'://进入
-                enter_return_new_page(&cur_mode,ENTER_PAGE);
-                break;
-            default:
-                break;
+                refresh_cur_interface();
             }
-            if(cmd == 'q'){
-                break;
+            break;
+        case 'a'://返回
+            enter_return_new_page(&cur_mode,RETURN_PAGE);
+            break;
+        case 's'://光标向下
+            if(cur_mode.cur_type == NON_LEAF)
+            {
+                cur_mode.cur_choose = (++cur_mode.cur_choose)%cur_mode.chosse_cnt;
+                refresh_cur_interface();
             }
-            cmd = 'l';
+            break;
+        case 'd'://进入
+            enter_return_new_page(&cur_mode,ENTER_PAGE);
+            break;
+        default:
+            break;
+        }
+        if(cmd == 'q'){
+            break;
+        }
+        cmd = 'l';
 
 
     }

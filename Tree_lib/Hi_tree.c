@@ -6,6 +6,9 @@
 */
 #include "../Common_Struct_lib/Hi_single_list.h"
 #include "../Common_Struct_lib/public.h"
+
+#include "../Common_Struct_lib/Hi_Queue.h"
+
 #include "stdlib.h"
 #include "stdio.h"
 #include "string.h"
@@ -34,13 +37,13 @@ typedef struct
 typedef struct leaf_accept menu_non_leaf;
 typedef struct leaf_node menu_leaf;
 
-typedef void (*show_dir_page)(menu_non_leaf *menu);
+typedef void (*show_dir_page)(const menu_non_leaf *menu);
 
-typedef void (*show_leaf_page)(menu_leaf *leaf);
+typedef void (*show_leaf_page)(const menu_leaf *leaf);
 typedef struct node_type_name
 {
     unsigned char type;
-    struct single_list_head local_pos;
+    struct single_list_head local_pos;//绑定子目录的头节点
     struct single_list_head hook;
     struct single_list_head parent_ptr;
 }node_type_name;
@@ -79,16 +82,17 @@ struct cur_indicate
 
 struct cur_indicate cur_mode;
 
-void simulate_show_leaf_page(menu_leaf *leaf)
+void simulate_show_leaf_page(const menu_leaf *leaf)
 {
     printf("================\n");
     printf("[   %s  ]\n",leaf->brief_info);
     printf("================\n");
 }
 
-void simulate_show_list_page(menu_non_leaf *menu)//由非叶子节点调用，显示子页面内容
+//只做显示处理,并不希望有人改变
+void simulate_show_list_page(const menu_non_leaf *menu)//由非叶子节点调用，显示子页面内容
 {
-    struct single_list_head *list_node = &menu->page_type.local_pos;
+    const struct single_list_head *list_node = &menu->page_type.local_pos;
     node_type_name *temp;
     menu_leaf *leaf_ui;
     menu_non_leaf *contain_ui;
@@ -235,13 +239,7 @@ menu_non_leaf* non_leaf_create(const char *text, show_dir_page cb)
 
     return non_leaf;
 } 
-void free_non_leaf(menu_non_leaf* non_lef)
-{
-    if(non_lef == NULL){
-        return;
-    }
-    free(non_lef);
-}
+
 menu_leaf* leaf_create(const char *text, show_leaf_page cb)
 {
     menu_leaf* leaf = (menu_leaf*)malloc(sizeof(menu_leaf));
@@ -255,18 +253,35 @@ menu_leaf* leaf_create(const char *text, show_leaf_page cb)
 
     return leaf;
 }
-void free_leaf(menu_leaf* leaf)
+
+
+
+void free_branch_auto(menu_non_leaf* non_lef)
 {
-    if(leaf == NULL){
-        return;
+    struct single_list_head *ptr = &non_lef->page_type.local_pos;
+    node_type_name *temp;
+    menu_leaf *leaf_ui;
+    menu_non_leaf *contain_ui;
+    
+    single_list_for_each_entry(temp,ptr,hook){
+        if(temp->type == LEAF){
+            leaf_ui = list_entry(temp,menu_leaf,page_type);
+            printf("free leaf:%s\n",leaf_ui->brief_info);
+            free(leaf_ui);
+        }else{
+            contain_ui = list_entry(temp,menu_non_leaf,page_type);
+            free_branch_auto(contain_ui);
+        }
     }
-    free(leaf);
+    printf("free non_leaf:%s\n",non_lef->brief_info);
+    free(non_lef);
 }
 
 
-
-
-
+/**
+ * 测试菜单类型
+ * 
+*/
 
 
 void main()
@@ -277,6 +292,8 @@ void main()
     menu_leaf *second_level_one;
     menu_non_leaf *second_level_two;
     menu_leaf *third_level_one;
+    menu_leaf *third_level_two;
+    menu_leaf *third_level_three;
     unsigned char cmd;
     
 
@@ -288,6 +305,8 @@ void main()
     first_level_two = leaf_create("01",simulate_show_leaf_page);
     second_level_one = leaf_create("000",simulate_show_leaf_page);
     third_level_one = leaf_create("0011",simulate_show_leaf_page);
+    third_level_two = leaf_create("0000",simulate_show_leaf_page);
+    third_level_three = leaf_create("0002",simulate_show_leaf_page);
 
 
     tree_node_bingding_by_ps(&root->page_type,&first_level_one->page_type);
@@ -299,6 +318,8 @@ void main()
     tree_node_bingding_by_ps(&first_level_one->page_type,&second_level_two->page_type);
 
     tree_node_bingding_by_ps(&second_level_two->page_type,&third_level_one->page_type);
+    tree_node_bingding_by_ps(&second_level_two->page_type,&third_level_two->page_type);
+    tree_node_bingding_by_ps(&second_level_two->page_type,&third_level_three->page_type);
 
     cur_mode.cur_list_head = &root->page_type.local_pos;
     cur_mode.cur_type = NON_LEAF;
@@ -310,8 +331,6 @@ void main()
 
     while(1)
     {
-        // if(kbhit())//<conio.h>
-        // {
             cmd = getchar();
             system("stty echo");
             switch (cmd)
@@ -347,20 +366,11 @@ void main()
                 break;
             }
             cmd = 'l';
-        // }
 
 
     }
 
-    free_non_leaf(root);
-    free_non_leaf(first_level_one);
-    free_non_leaf(second_level_two);
-    free_leaf(first_level_two);
-    free_leaf(second_level_one);
-    free_leaf(third_level_one);
-
-
-
+    free_branch_auto(root);
 }
 
 

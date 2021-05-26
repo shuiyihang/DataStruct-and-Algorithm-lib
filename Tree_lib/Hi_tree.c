@@ -13,6 +13,7 @@
 #include "stdio.h"
 #include "string.h"
 #include "stdarg.h"
+#include "time.h"
 
 #define True    1
 #define False   0
@@ -53,6 +54,7 @@ typedef struct iconInfo
 typedef struct MenuItem
 {
     unsigned char type;
+    unsigned char dynamic;//该页面需要实时更新
     const char *brief_info;//子菜单标题信息
     iconInfo_Typedef *icon;//子菜单的图标信息
     char *cur_icon;
@@ -82,7 +84,7 @@ typedef struct configSet
 
 configSet_Typedef *operat_config;
 
-
+time_t *timep;
 
 
 enum{
@@ -110,6 +112,7 @@ struct cur_indicate
 {
     unsigned char cur_type;
     unsigned char chosse_cnt;
+    unsigned char dynamic;
     char cur_choose;
     struct single_list_head *cur_list_head;//指向菜单的头节点
 };
@@ -232,6 +235,16 @@ void aboutPhone_page( MenuItem_Typedef *leaf)
     printf("[软件版本:  14.5.1]\n");
     printf("[运营商:    中国电信]\n");
     printf("====================\n");
+}
+
+void show_dynamic_time_page(MenuItem_Typedef *leaf)
+{
+    printf("======%s======\n",leaf->brief_info);
+    time(timep);
+    char *s = ctime(timep);
+    printf("%s",s);
+    printf("====================\n");
+    
 }
 
 
@@ -475,7 +488,7 @@ MenuItem_Typedef* non_leaf_create(unsigned char nodeType , const char *text, sho
     non_leaf->icon = argIcon;
     if(argIcon){
         non_leaf->cur_icon = argIcon->off_icon;
-        printf("create:%s\n",non_leaf->cur_icon);
+        // printf("create:%s\n",non_leaf->cur_icon);
     }
     
 
@@ -502,7 +515,7 @@ MenuItem_Typedef* leaf_create(unsigned char nodeType, unsigned char multi_suppor
             leaf->cur_icon = argIcon->off_icon;
         }
         
-        printf("create:%s\n",leaf->cur_icon);
+        // printf("create:%s\n",leaf->cur_icon);
     }
 
     return leaf;
@@ -544,6 +557,7 @@ void main()
     MenuItem_Typedef *UniversalNode;
     MenuItem_Typedef *BluetoothNode;
     MenuItem_Typedef *PhoneNode;
+    MenuItem_Typedef *TimeNode;
     MenuItem_Typedef *KeyNode;
     MenuItem_Typedef *CorrectNode;
     MenuItem_Typedef *oneHandleNode;
@@ -553,6 +567,8 @@ void main()
     unsigned char cmd;
 
     MenuItem_Typedef *deal_special_page;
+
+    timep = malloc(sizeof(*timep));
     
 
     operat_config = (configSet_Typedef*)malloc(sizeof(configSet_Typedef));
@@ -563,13 +579,16 @@ void main()
     KeyNode = non_leaf_create(NON_LEAF,"键盘",simulate_show_list_page,NULL);
 
     BluetoothNode = non_leaf_create(NON_LEAF,"蓝牙",simulate_show_option_icon,&text_onoff);//增加蓝牙开关控制节点
-    PhoneNode = leaf_create(OPEN_LEAF,MULTI_SUPPORT, "关于本机",aboutPhone_page,NULL,STATE_NULL);
+
+    PhoneNode = leaf_create(OPEN_LEAF,MULTI_SUPPORT, "关于本机",aboutPhone_page,NULL,STATE_NULL);//静态显示的
+    TimeNode = leaf_create(OPEN_LEAF,MULTI_SUPPORT,"时间",show_dynamic_time_page,NULL,STATE_NULL);//动态显示
+
     CorrectNode = non_leaf_create(NON_LEAF,"自动改正",simulate_show_option_icon,&text_onoff);//增加开关控制节点
     oneHandleNode = non_leaf_create(NON_LEAF,"单手键盘",simulate_show_option_icon,&sign_onoff);//增加开关控制节点
     slideInputNode = non_leaf_create(NON_LEAF,"滑行键入",simulate_show_option_icon,&text_onoff);
 
 
-
+    TimeNode->dynamic = 1;
 
     
     BluetoothNode_1 = leaf_create(CLOSE_LEAF, MULTI_SUPPORT, "蓝牙",blueTooth_page_deal, &text_onoff,STATE_OFF);//增加蓝牙开关控制节点 
@@ -585,7 +604,7 @@ void main()
 
     tree_node_binding_oneTime(2, rootNode,UniversalNode,BluetoothNode);
 
-    tree_node_binding_oneTime(2, UniversalNode,PhoneNode,KeyNode);
+    tree_node_binding_oneTime(3, UniversalNode,PhoneNode,KeyNode,TimeNode);
 
     tree_node_binding_oneTime(3, KeyNode,CorrectNode,
                                 oneHandleNode,slideInputNode);
@@ -602,6 +621,7 @@ void main()
 
 
     refresh_cur_interface();
+    
 
     while(1)
     {
@@ -647,7 +667,7 @@ void main()
         }
         cmd = 'l';
 
-        if(operat_config->need_refresh){
+        if(operat_config->need_refresh || cur_mode.dynamic){
             operat_config->need_refresh = 0;
             refresh_cur_interface();
         }
@@ -657,6 +677,7 @@ void main()
 
     free_branch_auto(rootNode);
     free(operat_config);
+    free(timep);
 }
 
 

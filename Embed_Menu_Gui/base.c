@@ -9,6 +9,7 @@
 #define True    1
 #define False   0
 
+#define PAGE_NUMS   3   //一页最多容纳 3 行
 
 typedef struct MenuItem MenuItem_Typedef;
 
@@ -27,6 +28,9 @@ typedef struct iconInfo
 typedef struct MenuItem
 {
     u8_t unitType;          //该菜单节点的信息
+
+    char selectNum;//选中的条目序号
+    char cursorPos;
     const char *briefInfo;  //子菜单标题信息
     const iconInfo_Typedef *icon;       //子菜单的图标信息
     const char *cur_icon;
@@ -96,6 +100,10 @@ struct cur_indicate
     u8_t cur_type;
     u8_t chosse_cnt;
     char cur_choose;
+
+    char startItem;//顶叶序号
+    char cursorPos;//光标位置
+    u8_t show_cnt;//显示的目数
     struct single_list_head *cur_list_head;//指向菜单的头节点
 };
 
@@ -129,15 +137,30 @@ void simulate_show_list_page(const MenuItem_Typedef *menu)//由非叶子节点�
     const struct single_list_head *list_node = &menu->localPos;
     MenuItem_Typedef *temp;
     u8_t cnt = 0;
+    u8_t labelNum = 0;
     printf("======%s======\t\n",menu->briefInfo);
     single_list_for_each_entry(temp,list_node,brother)
     {
-        if(cnt == cur_mode.cur_choose)
-            printf("==>:%s\t\n",temp->briefInfo);
-        else
-            printf("    %s\t\n",temp->briefInfo);
+        if(cnt >= cur_mode.startItem){
+            if(labelNum == cur_mode.cursorPos){
+                printf("==>:%s\t\n",temp->briefInfo);
+            }else{
+                printf("    %s\t\n",temp->briefInfo);
+            }
+            labelNum++;
+            if(labelNum >= PAGE_NUMS){
+                break;
+            }
+        }
         cnt++;
     }
+
+    while (labelNum < PAGE_NUMS)
+    {
+        labelNum++;
+        printf("\n");
+    }
+    
     printf("================\t\n");
 }
 
@@ -158,6 +181,11 @@ void simulate_show_option_icon(const MenuItem_Typedef *menu)
             printf("    %s           %s\t\n",temp->briefInfo,temp->cur_icon);
         
         cnt++;
+    }
+    while (cnt < PAGE_NUMS)
+    {
+        cnt++;
+        printf("\n");
     }
     printf("================\t\n");
 }
@@ -190,6 +218,13 @@ void aboutPhone_page( MenuItem_Typedef *leaf)
     printf("[名称:      蝴蝶与猫]\n");
     printf("[软件版本:  14.5.1]\n");
     printf("[运营商:    中国电信]\n");
+    printf("====================\n");
+}
+
+void test_turn_page(MenuItem_Typedef *leaf)
+{
+    printf("======%s======\n",leaf->briefInfo);
+    printf("[翻页测试:     .... ]\n");
     printf("====================\n");
 }
 
@@ -281,21 +316,29 @@ u8_t get_uplist_from_curlisthead(struct cur_indicate *curmode)
         return False;
     }
     curmode->cur_list_head = pos->parentPtr;
-    curmode->cur_choose = 0;//注意摆放的位置
     curmode->chosse_cnt = get_menu_choose_cnt();//注意摆放的位置
+
+    // printf("返回上一层现在的选择:%d,光标:%d,开始条目:%d\n",cur_mode.cur_choose,cur_mode.cursorPos,cur_mode.startItem);
     return True;
 }
 
 
 
 
-void currentFace_refresh(void)
+void currentFace_refresh(u8_t update)
 {
     MenuItem_Typedef *pos;
     struct single_list_head *ptr = cur_mode.cur_list_head;
 
     system("clear");
     pos = list_entry(ptr,MenuItem_Typedef,localPos);
+
+    if(update){
+        cur_mode.cur_choose = pos->selectNum;//注意摆放的位置
+        cur_mode.cursorPos = pos->cursorPos;
+        cur_mode.startItem = pos->selectNum - pos->cursorPos;
+    }//从下层返回的刷新,先拿到保存的数据
+    
     cur_mode.cur_type = pos->unitType;
     if(__get_node_type(pos->unitType) == OPEN_LEAF_SIGN){
         pos->endPageDeal(pos);
@@ -334,14 +377,14 @@ void select_verify_deal(struct cur_indicate *cur)
 
 void enterExit_to_newPage(struct cur_indicate *cur, u8_t mode)
 {
-    MenuItem_Typedef *pos;
+    MenuItem_Typedef *pos,*save;
     u8_t cnt = 0;
     struct single_list_head *ptr = cur->cur_list_head;
     if(mode == ENTER_PAGE){
 
-        pos = list_entry(ptr,MenuItem_Typedef,localPos);
-        printf("%d\n",pos->unitType);
-        if(__get_node_type(pos->unitType) == CLOSE_LEAF_SIGN){
+        save = list_entry(ptr,MenuItem_Typedef,localPos);
+        printf("%d\n",save->unitType);
+        if(__get_node_type(save->unitType) == CLOSE_LEAF_SIGN){
             printf("false non leaf\n");
             return;
         }
@@ -349,7 +392,13 @@ void enterExit_to_newPage(struct cur_indicate *cur, u8_t mode)
             single_list_for_each_entry(pos,ptr,brother)
             {
                 if(cnt == cur->cur_choose && __get_node_type(pos->unitType) != CLOSE_LEAF_SIGN){
+
+                    save->cursorPos = cur->cursorPos;//提前保存一下
+                    save->selectNum = cur->cur_choose;
+
                     cur->cur_choose = 0;//注意摆放的位置
+                    cur->cursorPos = 0;
+                    cur->startItem = 0;
                     cur->cur_list_head = &pos->localPos;//重新初始list
                     
                     cur->chosse_cnt = get_menu_choose_cnt();//注意摆放的位置
@@ -358,12 +407,13 @@ void enterExit_to_newPage(struct cur_indicate *cur, u8_t mode)
                 cnt++;
             }
         }
-        
+    currentFace_refresh(0);
     }else{//返回上一级
         get_uplist_from_curlisthead(cur);
+        currentFace_refresh(1);
     }
 
-    currentFace_refresh();
+    
 }
 
 
@@ -434,6 +484,8 @@ void free_branch_auto(MenuItem_Typedef* non_lef)
  * 简化重构当前的程序
  * 增加一页显示固定长度的功能
  * 
+ * 增加从新页退出后恢复原来光标的位置
+ * 
 */
 
 
@@ -452,6 +504,9 @@ void main()
     MenuItem_Typedef *slideInputNode;
 
     MenuItem_Typedef *BluetoothNode_1, *CorrectNode_1, *slideInputNode_1, *oneHandleNode_1, *oneHandleNode_2, *oneHandleNode_3;
+
+    MenuItem_Typedef *NotifyNode, *HotsportNode, *NoDisturbNode, *WifiNode;
+
     u8_t cmd;
 
     MenuItem_Typedef *deal_special_page;
@@ -466,7 +521,14 @@ void main()
     UniversalNode = branch_create(NON_LEAF,"通用",simulate_show_list_page);
     KeyNode = branch_create(NON_LEAF,"键盘",simulate_show_list_page);
 
-    BluetoothNode = branch_create(LEAF_OPEN,"蓝牙",simulate_show_option_icon);//增加蓝牙开关控制节点
+    BluetoothNode = branch_create(NON_LEAF,"蓝牙",simulate_show_option_icon);//增加蓝牙开关控制节点
+
+    //添加,翻页测试使用
+    WifiNode = leaf_create(LEAF_OPEN, "WIFI",test_turn_page,NULL);//静态显示的
+    NotifyNode = leaf_create(LEAF_OPEN, "通知",test_turn_page,NULL);//静态显示的
+    HotsportNode = leaf_create(LEAF_OPEN, "个人热点",test_turn_page,NULL);//静态显示的
+    NoDisturbNode = leaf_create(LEAF_OPEN, "勿扰模式",test_turn_page,NULL);//静态显示的
+    /////////////
 
     PhoneNode = leaf_create(LEAF_OPEN, "关于本机",aboutPhone_page,NULL);//静态显示的
     TimeNode = leaf_create(LEAF_OPEN,"时间",show_dynamic_time_page,NULL);//动态显示
@@ -489,9 +551,9 @@ void main()
 
 
 
-    tree_node_binding_oneTime(2, rootNode,UniversalNode,BluetoothNode);
+    tree_node_binding_oneTime(7, rootNode,BluetoothNode,WifiNode,UniversalNode,NotifyNode,HotsportNode,NoDisturbNode,TimeNode);
 
-    tree_node_binding_oneTime(3, UniversalNode,PhoneNode,KeyNode,TimeNode);
+    tree_node_binding_oneTime(2, UniversalNode,PhoneNode,KeyNode);
 
     tree_node_binding_oneTime(3, KeyNode,CorrectNode,
                                 oneHandleNode,slideInputNode);
@@ -505,9 +567,11 @@ void main()
     cur_mode.cur_type = rootNode->unitType;
     cur_mode.cur_choose = 0;
     cur_mode.chosse_cnt = get_menu_choose_cnt();
+    cur_mode.startItem = 0;
+    cur_mode.cur_type = 0;
 
 
-    currentFace_refresh();
+    currentFace_refresh(0);
     
 
     while(1)
@@ -517,15 +581,34 @@ void main()
         switch (cmd)
         {
         case 'w'://光标向上
-            printf("%d\n",cur_mode.cur_type);
             if(__get_node_type(cur_mode.cur_type) == NON_LEAF_SIGN)
             {
                 cur_mode.cur_choose--;
                 if(cur_mode.cur_choose<0)
                 {
-                    cur_mode.cur_choose = cur_mode.chosse_cnt - 1;
+                    cur_mode.cur_choose = 0;
                 }
-                currentFace_refresh();
+
+                cur_mode.cursorPos--;
+                if(cur_mode.chosse_cnt <= PAGE_NUMS){
+                    cur_mode.show_cnt = cur_mode.chosse_cnt;
+                    if(cur_mode.cursorPos < 0){
+                        cur_mode.cursorPos = 0;//diff
+                    }
+                }else{
+                    cur_mode.show_cnt = PAGE_NUMS;
+                    if(cur_mode.cursorPos < 0){
+                        cur_mode.cursorPos = 0;
+                        if(cur_mode.startItem > 0 ){
+                            cur_mode.startItem--;
+                        }
+                    }
+                }
+                // printf("现在的选择:%d,光标:%d,开始条目:%d\n",cur_mode.cur_choose,cur_mode.cursorPos,cur_mode.startItem);
+
+
+
+                currentFace_refresh(0);
             }
             break;
         case 'a'://返回
@@ -534,8 +617,29 @@ void main()
         case 's'://光标向下
             if(__get_node_type(cur_mode.cur_type) == NON_LEAF_SIGN)
             {
-                cur_mode.cur_choose = (++cur_mode.cur_choose)%cur_mode.chosse_cnt;
-                currentFace_refresh();
+                cur_mode.cur_choose++;
+                if(cur_mode.cur_choose >= cur_mode.chosse_cnt){
+                    cur_mode.cur_choose = cur_mode.chosse_cnt-1;
+                }
+
+
+                cur_mode.cursorPos++;
+                if(cur_mode.chosse_cnt <= PAGE_NUMS){
+                    cur_mode.show_cnt = cur_mode.chosse_cnt;
+                    if(cur_mode.cursorPos >= cur_mode.show_cnt){
+                        cur_mode.cursorPos = cur_mode.show_cnt-1;//diff
+                    }
+                }else{
+                    cur_mode.show_cnt = PAGE_NUMS;
+                    if(cur_mode.cursorPos >= PAGE_NUMS){
+                        cur_mode.cursorPos = PAGE_NUMS-1;
+                        if(cur_mode.startItem < cur_mode.chosse_cnt - PAGE_NUMS){
+                            cur_mode.startItem++;
+                        }
+                    }
+                }
+                // printf("现在的选择:%d,光标:%d,开始条目:%d\n",cur_mode.cur_choose,cur_mode.cursorPos,cur_mode.startItem);
+                currentFace_refresh(0);
             }
             break;
         case 'd'://进入 
@@ -557,7 +661,7 @@ void main()
 
         if(operat_config->need_refresh){
             operat_config->need_refresh = 0;
-            currentFace_refresh();
+            currentFace_refresh(0);
         }
 
 

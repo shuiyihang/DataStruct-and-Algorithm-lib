@@ -13,8 +13,8 @@
 #include "stdlib.h"
 
 
-#define     u8_t        unsigned char
-#define     u16_t       unsigned int
+typedef   unsigned char     u8_t;   
+typedef   unsigned short    u16_t;   
 
 
 #define CONTAINER_OF(ptr,type,member) ({\

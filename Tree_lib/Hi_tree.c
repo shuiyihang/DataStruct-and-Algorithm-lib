@@ -5,7 +5,6 @@
  * 也是有一个根节点
 */
 #include "../Common_Struct_lib/Hi_single_list.h"
-#include "../Common_Struct_lib/public.h"
 
 #include "../Common_Struct_lib/Hi_Queue.h"
 
@@ -48,13 +47,13 @@ typedef struct iconInfo
 {
     char *on_icon;
     char *off_icon;
-    // unsigned char set_x;
-    // unsigned char set_y;
+    // u8_t set_x;
+    // u8_t set_y;
 }iconInfo_Typedef;
 typedef struct MenuItem
 {
-    unsigned char type;
-    unsigned char dynamic;//该页面需要实时更新
+    u8_t type;
+    u8_t dynamic;//该页面需要实时更新
     const char *brief_info;//子菜单标题信息
     iconInfo_Typedef *icon;//子菜单的图标信息
     char *cur_icon;
@@ -65,7 +64,7 @@ typedef struct MenuItem
         show_dir_page   showMenu;
         show_leaf_page  showPage;
     };
-    unsigned char multiOne;//子节点只支持多选一
+    u8_t multiOne;//子节点只支持多选一
 }MenuItem_Typedef;
 
 
@@ -73,11 +72,11 @@ typedef struct MenuItem
 
 typedef struct configSet
 {
-    unsigned char need_refresh;//是否需要刷屏
-    unsigned char bt_state;//蓝牙开关状态
-    unsigned char correct_state;//自动改正开关
-    unsigned char oneHandle_state;//单手状态
-    unsigned char glid_state;//是否允许滑动
+    u8_t need_refresh;//是否需要刷屏
+    u8_t bt_state;//蓝牙开关状态
+    u8_t correct_state;//自动改正开关
+    u8_t oneHandle_state;//单手状态
+    u8_t glid_state;//是否允许滑动
 
 }configSet_Typedef;
 
@@ -110,9 +109,9 @@ enum{
 };
 struct cur_indicate
 {
-    unsigned char cur_type;
-    unsigned char chosse_cnt;
-    unsigned char dynamic;
+    u8_t cur_type;
+    u8_t chosse_cnt;
+    u8_t dynamic;
     char cur_choose;
     struct single_list_head *cur_list_head;//指向菜单的头节点
 };
@@ -162,7 +161,7 @@ void simulate_show_list_page(const MenuItem_Typedef *menu)//由非叶子节点�
 {
     const struct single_list_head *list_node = &menu->localPos;
     MenuItem_Typedef *temp;
-    unsigned char cnt = 0;
+    u8_t cnt = 0;
     printf("======%s======\t\n",menu->brief_info);
     single_list_for_each_entry(temp,list_node,brother)
     {
@@ -182,7 +181,7 @@ void simulate_show_option_icon(const MenuItem_Typedef *menu)
     //这个页面由具有选择项子页面的非叶子节点调用
     const struct single_list_head *list_node = &menu->localPos;
     MenuItem_Typedef *temp;
-    unsigned char cnt = 0;
+    u8_t cnt = 0;
     printf("======%s======\t\n",menu->brief_info);
     single_list_for_each_entry(temp,list_node,brother)
     {
@@ -364,9 +363,9 @@ void tree_node_binding_oneTime(int cnt, MenuItem_Typedef *non_leaf,...)
 
 
 
-unsigned char get_menu_choose_cnt()
+u8_t get_menu_choose_cnt()
 {
-    unsigned char cnt=0;
+    u8_t cnt=0;
     struct single_list_head* temp = cur_mode.cur_list_head->next;
     while(temp){
         cnt++;
@@ -375,7 +374,7 @@ unsigned char get_menu_choose_cnt()
     return cnt;
 }
 
-unsigned char get_uplist_from_curlisthead(struct cur_indicate *curmode)
+u8_t get_uplist_from_curlisthead(struct cur_indicate *curmode)
 {
     MenuItem_Typedef *pos;
     struct single_list_head *ptr = curmode->cur_list_head;
@@ -412,7 +411,7 @@ void refresh_cur_interface(void)
 void confirm_progress(struct cur_indicate *cur)
 {
     MenuItem_Typedef *pos;
-    unsigned char cnt = 0;
+    u8_t cnt = 0;
     struct single_list_head *ptr = cur->cur_list_head;
 
     single_list_for_each_entry(pos,ptr,brother)
@@ -438,10 +437,10 @@ void confirm_progress(struct cur_indicate *cur)
 
 }
 
-void enter_return_new_page(struct cur_indicate *cur, unsigned char mode)
+void enter_return_new_page(struct cur_indicate *cur, u8_t mode)
 {
     MenuItem_Typedef *pos;
-    unsigned char cnt = 0;
+    u8_t cnt = 0;
     struct single_list_head *ptr = cur->cur_list_head;
     if(mode == ENTER_PAGE){
 
@@ -474,7 +473,7 @@ void enter_return_new_page(struct cur_indicate *cur, unsigned char mode)
 
 
 
-MenuItem_Typedef* non_leaf_create(unsigned char nodeType , const char *text, show_dir_page cb,  iconInfo_Typedef *argIcon)
+MenuItem_Typedef* non_leaf_create(u8_t nodeType , const char *text, show_dir_page cb,  iconInfo_Typedef *argIcon)
 {
     MenuItem_Typedef* non_leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(non_leaf == NULL){
@@ -494,7 +493,7 @@ MenuItem_Typedef* non_leaf_create(unsigned char nodeType , const char *text, sho
     return non_leaf;
 } 
 
-MenuItem_Typedef* leaf_create(unsigned char nodeType, unsigned char multi_support, const char *text, show_leaf_page cb , iconInfo_Typedef *argIcon, unsigned char initState)
+MenuItem_Typedef* leaf_create(u8_t nodeType, u8_t multi_support, const char *text, show_leaf_page cb , iconInfo_Typedef *argIcon, u8_t initState)
 {
     MenuItem_Typedef* leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(leaf == NULL){
@@ -568,7 +567,7 @@ void main()
     MenuItem_Typedef *slideInputNode;
 
     MenuItem_Typedef *BluetoothNode_1, *CorrectNode_1, *slideInputNode_1, *oneHandleNode_1, *oneHandleNode_2, *oneHandleNode_3;
-    unsigned char cmd;
+    u8_t cmd;
 
     MenuItem_Typedef *deal_special_page;
 

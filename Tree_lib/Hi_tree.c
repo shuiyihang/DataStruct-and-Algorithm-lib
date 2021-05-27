@@ -435,7 +435,6 @@ void confirm_progress(struct cur_indicate *cur)
         }
         cnt++;
     }
-    refresh_cur_interface();
 
 }
 
@@ -546,6 +545,11 @@ void free_branch_auto(MenuItem_Typedef* non_lef)
  * 
  * 1. 需要再检查代表当前的cur_mode类型简化，能不能不独立出这个单独类型
  * 2. 绑定时候能不能再优雅些
+ * 
+ * TODO:
+ * 简化重构当前的程序
+ * 增加一页显示固定长度的功能
+ * 
 */
 
 

@@ -10,6 +10,7 @@
         "kmp.h": "c",
         "public.h": "c",
         "hi_single_list.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "type_traits": "c"
     }
 }

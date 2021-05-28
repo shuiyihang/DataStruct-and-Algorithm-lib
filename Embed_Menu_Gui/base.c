@@ -20,20 +20,28 @@ typedef void (*show_leaf_page)( MenuItem_Typedef *leaf);
 typedef void (*leaf_page_keyDeal)(void);
 
 
+
+
+
+/**
+ * TODO 
+ * 简化处理函数的类型
+ * 
+*/
 typedef struct iconInfo
 {
-    const char *on_icon;
-    const char *off_icon;
+    const s8_t *on_icon;
+    const s8_t *off_icon;
 }iconInfo_Typedef;
 typedef struct MenuItem
 {
     u8_t unitType;          //该菜单节点的信息
 
-    char selectNum;//选中的条目序号
-    char cursorPos;
-    const char *briefInfo;  //子菜单标题信息
+    s8_t selectNum;         //选中的条目序号
+    s8_t cursorPos;         //光标位置
+    const s8_t *briefInfo;  //子菜单标题信息
     const iconInfo_Typedef *icon;       //子菜单的图标信息
-    const char *cur_icon;
+    const s8_t *cur_icon;
     struct single_list_head  localPos;  //绑定子目录的头节点
     struct single_list_head  brother;
     struct single_list_head *parentPtr;
@@ -48,7 +56,6 @@ typedef struct MenuItem
 
 typedef struct configSet
 {
-    u8_t need_refresh;//是否需要刷屏
     u8_t bt_state;//蓝牙开关状态
     u8_t correct_state;//自动改正开关
     u8_t oneHandle_state;//单手状态
@@ -95,19 +102,21 @@ enum{
     RETURN_PAGE,
 };
 
-struct cur_indicate
+typedef struct curHandle
 {
     u8_t cur_type;
     u8_t chosse_cnt;
-    char cur_choose;
-
-    char startItem;//顶叶序号
-    char cursorPos;//光标位置
     u8_t show_cnt;//显示的目数
-    struct single_list_head *cur_list_head;//指向菜单的头节点
-};
+    u8_t need_refresh;//是否需要刷屏
 
-struct cur_indicate cur_mode;
+    s8_t cur_choose;
+    s8_t startItem;//顶叶序号
+    s8_t cursorPos;//光标位置
+    
+    struct single_list_head *cur_list_head;//指向菜单的头节点
+}curHandle_Typedef;
+
+curHandle_Typedef menuHandle;
 
 
 //定义开关的风格
@@ -141,8 +150,8 @@ void simulate_show_list_page(const MenuItem_Typedef *menu)//由非叶子节点�
     printf("======%s======\t\n",menu->briefInfo);
     single_list_for_each_entry(temp,list_node,brother)
     {
-        if(cnt >= cur_mode.startItem){
-            if(labelNum == cur_mode.cursorPos){
+        if(cnt >= menuHandle.startItem){
+            if(labelNum == menuHandle.cursorPos){
                 printf("==>:%s\t\n",temp->briefInfo);
             }else{
                 printf("    %s\t\n",temp->briefInfo);
@@ -175,7 +184,7 @@ void simulate_show_option_icon(const MenuItem_Typedef *menu)
     printf("======%s======\t\n",menu->briefInfo);
     single_list_for_each_entry(temp,list_node,brother)
     {
-        if(cnt == cur_mode.cur_choose)
+        if(cnt == menuHandle.cur_choose)
             printf("==>:%s           %s\t\n",temp->briefInfo,temp->cur_icon);//有问题
         else
             printf("    %s           %s\t\n",temp->briefInfo,temp->cur_icon);
@@ -203,7 +212,6 @@ void simulate_show_option_icon(const MenuItem_Typedef *menu)
 void blueTooth_page_deal( MenuItem_Typedef *leaf)
 {
     operat_config->bt_state = ~operat_config->bt_state;
-    operat_config->need_refresh = 1;
     if(operat_config->bt_state){
         leaf->cur_icon = leaf->icon->on_icon;
     }else{
@@ -212,7 +220,7 @@ void blueTooth_page_deal( MenuItem_Typedef *leaf)
 }
 
 
-void aboutPhone_page( MenuItem_Typedef *leaf)
+void aboutPhone_page( MenuItem_Typedef *leaf)//如果是一段长文本的话,应该也支持翻页
 {
     printf("======%s======\n",leaf->briefInfo);
     printf("[名称:      蝴蝶与猫]\n");
@@ -232,7 +240,7 @@ void show_dynamic_time_page(MenuItem_Typedef *leaf)
 {
     printf("======%s======\n",leaf->briefInfo);
     time(timep);
-    char *s = ctime(timep);
+    s8_t *s = ctime(timep);
     printf("%s",s);
     printf("====================\n");
     
@@ -242,7 +250,6 @@ void show_dynamic_time_page(MenuItem_Typedef *leaf)
 void autoCorrct_page_deal( MenuItem_Typedef *leaf)
 {
     operat_config->correct_state = ~operat_config->correct_state;
-    operat_config->need_refresh = 1;
     if(operat_config->correct_state){
         leaf->cur_icon = leaf->icon->on_icon;
     }else{
@@ -255,7 +262,6 @@ void autoCorrct_page_deal( MenuItem_Typedef *leaf)
 void oneHandle_page_deal( MenuItem_Typedef *leaf)//这种情况是3选一
 {
     operat_config->oneHandle_state = (++operat_config->oneHandle_state)%3;
-    operat_config->need_refresh = 1;
     //只能单选
 
     leaf->cur_icon = leaf->icon->on_icon; 
@@ -265,7 +271,6 @@ void oneHandle_page_deal( MenuItem_Typedef *leaf)//这种情况是3选一
 void glide_page_deal( MenuItem_Typedef *leaf)
 {
     operat_config->glid_state = ~operat_config->glid_state;
-    operat_config->need_refresh = 1;
     if(operat_config->glid_state){
         leaf->cur_icon = leaf->icon->on_icon;
     }else{
@@ -298,7 +303,7 @@ void tree_node_binding_oneTime(int cnt, MenuItem_Typedef *non_leaf,...)
 u8_t get_menu_choose_cnt()
 {
     u8_t cnt=0;
-    struct single_list_head* temp = cur_mode.cur_list_head->next;
+    struct single_list_head* temp = menuHandle.cur_list_head->next;
     while(temp){
         cnt++;
         temp = temp->next;
@@ -306,40 +311,39 @@ u8_t get_menu_choose_cnt()
     return cnt;
 }
 
-u8_t get_uplist_from_curlisthead(struct cur_indicate *curmode)
+u8_t get_uplist_from_curlisthead(curHandle_Typedef *handle)
 {
     MenuItem_Typedef *pos;
-    struct single_list_head *ptr = curmode->cur_list_head;
+    struct single_list_head *ptr = handle->cur_list_head;
     pos = list_entry(ptr,MenuItem_Typedef,localPos);
 
     if(pos->parentPtr == NULL){
         return False;
     }
-    curmode->cur_list_head = pos->parentPtr;
-    curmode->chosse_cnt = get_menu_choose_cnt();//注意摆放的位置
+    handle->cur_list_head = pos->parentPtr;
+    handle->chosse_cnt = get_menu_choose_cnt();//注意摆放的位置
 
-    // printf("返回上一层现在的选择:%d,光标:%d,开始条目:%d\n",cur_mode.cur_choose,cur_mode.cursorPos,cur_mode.startItem);
+    pos = list_entry(handle->cur_list_head,MenuItem_Typedef,localPos);
+    handle->cur_choose = pos->selectNum;
+    handle->cursorPos = pos->cursorPos;
+    handle->startItem = pos->selectNum - pos->cursorPos;
+
+    // printf("返回上一层现在的选择:%d,光标:%d,开始条目:%d\n",menuHandle.cur_choose,menuHandle.cursorPos,menuHandle.startItem);
     return True;
 }
 
 
 
 
-void currentFace_refresh(u8_t update)
+void currentFace_refresh(void)
 {
     MenuItem_Typedef *pos;
-    struct single_list_head *ptr = cur_mode.cur_list_head;
+    struct single_list_head *ptr = menuHandle.cur_list_head;
 
     system("clear");
     pos = list_entry(ptr,MenuItem_Typedef,localPos);
 
-    if(update){
-        cur_mode.cur_choose = pos->selectNum;//注意摆放的位置
-        cur_mode.cursorPos = pos->cursorPos;
-        cur_mode.startItem = pos->selectNum - pos->cursorPos;
-    }//从下层返回的刷新,先拿到保存的数据
-    
-    cur_mode.cur_type = pos->unitType;
+    menuHandle.cur_type = pos->unitType;
     if(__get_node_type(pos->unitType) == OPEN_LEAF_SIGN){
         pos->endPageDeal(pos);
     }else if(__get_node_type(pos->unitType) == NON_LEAF_SIGN){
@@ -347,18 +351,18 @@ void currentFace_refresh(u8_t update)
     }
 }
 
-void select_verify_deal(struct cur_indicate *cur)
+void select_verify_deal(curHandle_Typedef *handle)
 {
     MenuItem_Typedef *pos;
     u8_t cnt = 0;
-    struct single_list_head *ptr = cur->cur_list_head;
+    struct single_list_head *ptr = handle->cur_list_head;
 
     single_list_for_each_entry(pos,ptr,brother)
     {
         if(__get_node_type(pos->unitType) != CLOSE_LEAF_SIGN){
                 return;//
         }
-        if(cnt == cur->cur_choose){
+        if(cnt == handle->cur_choose){
             
             pos->endPageDeal(pos);//改变配置参数
 
@@ -372,14 +376,15 @@ void select_verify_deal(struct cur_indicate *cur)
         }
         cnt++;
     }
+    handle->need_refresh = 1;
 
 }
 
-void enterExit_to_newPage(struct cur_indicate *cur, u8_t mode)
+void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode)
 {
     MenuItem_Typedef *pos,*save;
     u8_t cnt = 0;
-    struct single_list_head *ptr = cur->cur_list_head;
+    struct single_list_head *ptr = handle->cur_list_head;
     if(mode == ENTER_PAGE){
 
         save = list_entry(ptr,MenuItem_Typedef,localPos);
@@ -391,26 +396,26 @@ void enterExit_to_newPage(struct cur_indicate *cur, u8_t mode)
         if(ptr->next){//非空进入下一个页面
             single_list_for_each_entry(pos,ptr,brother)
             {
-                if(cnt == cur->cur_choose && __get_node_type(pos->unitType) != CLOSE_LEAF_SIGN){
+                if(cnt == handle->cur_choose && __get_node_type(pos->unitType) != CLOSE_LEAF_SIGN){
 
-                    save->cursorPos = cur->cursorPos;//提前保存一下
-                    save->selectNum = cur->cur_choose;
+                    save->cursorPos = handle->cursorPos;//提前保存一下
+                    save->selectNum = handle->cur_choose;
 
-                    cur->cur_choose = 0;//注意摆放的位置
-                    cur->cursorPos = 0;
-                    cur->startItem = 0;
-                    cur->cur_list_head = &pos->localPos;//重新初始list
+                    handle->cur_choose = 0;//注意摆放的位置
+                    handle->cursorPos = 0;
+                    handle->startItem = 0;
+                    handle->cur_list_head = &pos->localPos;//重新初始list
                     
-                    cur->chosse_cnt = get_menu_choose_cnt();//注意摆放的位置
+                    handle->chosse_cnt = get_menu_choose_cnt();//注意摆放的位置
                     break;
                 }
                 cnt++;
             }
+            handle->need_refresh = 1;
         }
-    currentFace_refresh(0);
     }else{//返回上一级
-        get_uplist_from_curlisthead(cur);
-        currentFace_refresh(1);
+        if(get_uplist_from_curlisthead(handle))
+            handle->need_refresh = 1;
     }
 
     
@@ -418,7 +423,7 @@ void enterExit_to_newPage(struct cur_indicate *cur, u8_t mode)
 
 
 
-MenuItem_Typedef* branch_create(u8_t nodeType , const char *text, show_dir_page cb)
+MenuItem_Typedef* branch_create(u8_t nodeType , const s8_t *text, show_dir_page cb)
 {
     MenuItem_Typedef* non_leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(non_leaf == NULL){
@@ -433,7 +438,7 @@ MenuItem_Typedef* branch_create(u8_t nodeType , const char *text, show_dir_page 
     return non_leaf;
 } 
 
-MenuItem_Typedef* leaf_create(u8_t nodeType, const char *text, show_leaf_page cb , iconInfo_Typedef *argIcon)
+MenuItem_Typedef* leaf_create(u8_t nodeType, const s8_t *text, show_leaf_page cb , iconInfo_Typedef *argIcon)
 {
     MenuItem_Typedef* leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(leaf == NULL){
@@ -478,7 +483,7 @@ void free_branch_auto(MenuItem_Typedef* non_lef)
 /**
  * 测试菜单类型
  * 
- * 1. 需要再检查代表当前的cur_mode类型简化，能不能不独立出这个单独类型
+ * 1. 需要再检查代表当前的menuHandle类型简化，能不能不独立出这个单独类型
  * 
  * TODO:
  * 简化重构当前的程序
@@ -487,7 +492,14 @@ void free_branch_auto(MenuItem_Typedef* non_lef)
  * 增加从新页退出后恢复原来光标的位置
  * 
 */
-
+void currentHandleInit(MenuItem_Typedef * root, curHandle_Typedef *handle)
+{
+    memset(handle,0,sizeof(curHandle_Typedef));
+    handle->cur_list_head = &root->localPos;
+    handle->cur_type = root->unitType;
+    handle->chosse_cnt = get_menu_choose_cnt();
+    handle->need_refresh = 1;
+}
 
 
 
@@ -563,92 +575,87 @@ void main()
     tree_node_binding_oneTime(1,slideInputNode,slideInputNode_1);
     tree_node_binding_oneTime(3,oneHandleNode,oneHandleNode_1,oneHandleNode_2,oneHandleNode_3);
 
-    cur_mode.cur_list_head = &rootNode->localPos;
-    cur_mode.cur_type = rootNode->unitType;
-    cur_mode.cur_choose = 0;
-    cur_mode.chosse_cnt = get_menu_choose_cnt();
-    cur_mode.startItem = 0;
-    cur_mode.cur_type = 0;
+    
+    currentHandleInit(rootNode,&menuHandle);
 
-
-    currentFace_refresh(0);
     
 
     while(1)
     {
-        cmd = getchar();
+        if(menuHandle.need_refresh){
+            menuHandle.need_refresh = 0;
+            currentFace_refresh();
+        }
+
+        cmd = gets8_t();
         system("stty echo");
         switch (cmd)
         {
         case 'w'://光标向上
-            if(__get_node_type(cur_mode.cur_type) == NON_LEAF_SIGN)
+            if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN)
             {
-                cur_mode.cur_choose--;
-                if(cur_mode.cur_choose<0)
-                {
-                    cur_mode.cur_choose = 0;
+                
+                if(menuHandle.cur_choose>0){
+                    menuHandle.cur_choose--;
                 }
 
-                cur_mode.cursorPos--;
-                if(cur_mode.chosse_cnt <= PAGE_NUMS){
-                    cur_mode.show_cnt = cur_mode.chosse_cnt;
-                    if(cur_mode.cursorPos < 0){
-                        cur_mode.cursorPos = 0;//diff
+                menuHandle.cursorPos--;
+                if(menuHandle.chosse_cnt <= PAGE_NUMS){
+                    menuHandle.show_cnt = menuHandle.chosse_cnt;
+                    if(menuHandle.cursorPos < 0){
+                        menuHandle.cursorPos = 0;//diff
                     }
                 }else{
-                    cur_mode.show_cnt = PAGE_NUMS;
-                    if(cur_mode.cursorPos < 0){
-                        cur_mode.cursorPos = 0;
-                        if(cur_mode.startItem > 0 ){
-                            cur_mode.startItem--;
+                    menuHandle.show_cnt = PAGE_NUMS;
+                    if(menuHandle.cursorPos < 0){
+                        menuHandle.cursorPos = 0;
+                        if(menuHandle.startItem > 0 ){
+                            menuHandle.startItem--;
                         }
                     }
                 }
-                // printf("现在的选择:%d,光标:%d,开始条目:%d\n",cur_mode.cur_choose,cur_mode.cursorPos,cur_mode.startItem);
+                // printf("现在的选择:%d,光标:%d,开始条目:%d\n",menuHandle.cur_choose,menuHandle.cursorPos,menuHandle.startItem);
 
-
-
-                currentFace_refresh(0);
+                menuHandle.need_refresh = 1;
             }
             break;
         case 'a'://返回
-            enterExit_to_newPage(&cur_mode,RETURN_PAGE);
+            enterExit_to_newPage(&menuHandle,RETURN_PAGE);
             break;
         case 's'://光标向下
-            if(__get_node_type(cur_mode.cur_type) == NON_LEAF_SIGN)
+            if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN)
             {
-                cur_mode.cur_choose++;
-                if(cur_mode.cur_choose >= cur_mode.chosse_cnt){
-                    cur_mode.cur_choose = cur_mode.chosse_cnt-1;
+                if(menuHandle.cur_choose < menuHandle.chosse_cnt-1){
+                    menuHandle.cur_choose++;
                 }
 
 
-                cur_mode.cursorPos++;
-                if(cur_mode.chosse_cnt <= PAGE_NUMS){
-                    cur_mode.show_cnt = cur_mode.chosse_cnt;
-                    if(cur_mode.cursorPos >= cur_mode.show_cnt){
-                        cur_mode.cursorPos = cur_mode.show_cnt-1;//diff
+                menuHandle.cursorPos++;
+                if(menuHandle.chosse_cnt <= PAGE_NUMS){
+                    menuHandle.show_cnt = menuHandle.chosse_cnt;
+                    if(menuHandle.cursorPos >= menuHandle.show_cnt){
+                        menuHandle.cursorPos = menuHandle.show_cnt-1;//diff
                     }
                 }else{
-                    cur_mode.show_cnt = PAGE_NUMS;
-                    if(cur_mode.cursorPos >= PAGE_NUMS){
-                        cur_mode.cursorPos = PAGE_NUMS-1;
-                        if(cur_mode.startItem < cur_mode.chosse_cnt - PAGE_NUMS){
-                            cur_mode.startItem++;
+                    menuHandle.show_cnt = PAGE_NUMS;
+                    if(menuHandle.cursorPos >= PAGE_NUMS){
+                        menuHandle.cursorPos = PAGE_NUMS-1;
+                        if(menuHandle.startItem < menuHandle.chosse_cnt - PAGE_NUMS){
+                            menuHandle.startItem++;
                         }
                     }
                 }
-                // printf("现在的选择:%d,光标:%d,开始条目:%d\n",cur_mode.cur_choose,cur_mode.cursorPos,cur_mode.startItem);
-                currentFace_refresh(0);
+                // printf("现在的选择:%d,光标:%d,开始条目:%d\n",menuHandle.cur_choose,menuHandle.cursorPos,menuHandle.startItem);
+                menuHandle.need_refresh = 1;
             }
             break;
         case 'd'://进入 
-            enterExit_to_newPage(&cur_mode,ENTER_PAGE);
+            enterExit_to_newPage(&menuHandle,ENTER_PAGE);
             break;
         case 'e':
             //1 执行对应deal函数
             //2 刷新当前FALSE_NON_LEAF页面
-            select_verify_deal(&cur_mode);
+            select_verify_deal(&menuHandle);
             break;//确认键
         default:
             break;
@@ -659,10 +666,7 @@ void main()
         }
         cmd = 'l';
 
-        if(operat_config->need_refresh){
-            operat_config->need_refresh = 0;
-            currentFace_refresh(0);
-        }
+        
 
 
     }

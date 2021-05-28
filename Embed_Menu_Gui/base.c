@@ -30,8 +30,8 @@ typedef void (*leaf_page_keyDeal)(void);
 */
 typedef struct iconInfo
 {
-    const s8_t *on_icon;
-    const s8_t *off_icon;
+    const char *on_icon;
+    const char *off_icon;
 }iconInfo_Typedef;
 typedef struct MenuItem
 {
@@ -39,9 +39,9 @@ typedef struct MenuItem
 
     s8_t selectNum;         //选中的条目序号
     s8_t cursorPos;         //光标位置
-    const s8_t *briefInfo;  //子菜单标题信息
+    const char *briefInfo;  //子菜单标题信息
     const iconInfo_Typedef *icon;       //子菜单的图标信息
-    const s8_t *cur_icon;
+    const char *cur_icon;
     struct single_list_head  localPos;  //绑定子目录的头节点
     struct single_list_head  brother;
     struct single_list_head *parentPtr;
@@ -240,7 +240,7 @@ void show_dynamic_time_page(MenuItem_Typedef *leaf)
 {
     printf("======%s======\n",leaf->briefInfo);
     time(timep);
-    s8_t *s = ctime(timep);
+    char *s = ctime(timep);
     printf("%s",s);
     printf("====================\n");
     
@@ -284,7 +284,7 @@ void glide_page_deal( MenuItem_Typedef *leaf)
 //建树
 //通过指定父亲和儿子来构件关系
 //通过不定参数一次性绑定
-void tree_node_binding_oneTime(int cnt, MenuItem_Typedef *non_leaf,...)
+void tree_node_binding_oneTime(u16_t cnt, MenuItem_Typedef *non_leaf,...)
 {
     va_list argPtr;
     MenuItem_Typedef *temp;
@@ -423,7 +423,7 @@ void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode)
 
 
 
-MenuItem_Typedef* branch_create(u8_t nodeType , const s8_t *text, show_dir_page cb)
+MenuItem_Typedef* branchCreate(u8_t nodeType , const char *text, show_dir_page cb)
 {
     MenuItem_Typedef* non_leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(non_leaf == NULL){
@@ -438,7 +438,7 @@ MenuItem_Typedef* branch_create(u8_t nodeType , const s8_t *text, show_dir_page 
     return non_leaf;
 } 
 
-MenuItem_Typedef* leaf_create(u8_t nodeType, const s8_t *text, show_leaf_page cb , iconInfo_Typedef *argIcon)
+MenuItem_Typedef* leafCreate(u8_t nodeType, const char *text, show_leaf_page cb , iconInfo_Typedef *argIcon)
 {
     MenuItem_Typedef* leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(leaf == NULL){
@@ -502,6 +502,50 @@ void currentHandleInit(MenuItem_Typedef * root, curHandle_Typedef *handle)
 }
 
 
+void chooseCursorUp()
+{
+    if(menuHandle.cur_choose>0){
+        menuHandle.cur_choose--;
+    }
+
+    menuHandle.cursorPos--;
+    if(menuHandle.chosse_cnt <= PAGE_NUMS){
+        menuHandle.show_cnt = menuHandle.chosse_cnt;
+        if(menuHandle.cursorPos < 0){
+            menuHandle.cursorPos = 0;//diff
+        }
+    }else{
+        menuHandle.show_cnt = PAGE_NUMS;
+        if(menuHandle.cursorPos < 0){
+            menuHandle.cursorPos = 0;
+            if(menuHandle.startItem > 0 ){
+                menuHandle.startItem--;
+            }
+        }
+    }
+}
+void chooseCursorDown()
+{
+    if(menuHandle.cur_choose < menuHandle.chosse_cnt-1){
+        menuHandle.cur_choose++;
+    }
+
+    menuHandle.cursorPos++;
+    if(menuHandle.chosse_cnt <= PAGE_NUMS){
+        menuHandle.show_cnt = menuHandle.chosse_cnt;
+        if(menuHandle.cursorPos >= menuHandle.show_cnt){
+            menuHandle.cursorPos = menuHandle.show_cnt-1;//diff
+        }
+    }else{
+        menuHandle.show_cnt = PAGE_NUMS;
+        if(menuHandle.cursorPos >= PAGE_NUMS){
+            menuHandle.cursorPos = PAGE_NUMS-1;
+            if(menuHandle.startItem < menuHandle.chosse_cnt - PAGE_NUMS){
+                menuHandle.startItem++;
+            }
+        }
+    }
+}
 
 void main()
 {
@@ -529,35 +573,35 @@ void main()
     operat_config = (configSet_Typedef*)malloc(sizeof(configSet_Typedef));
     memset(operat_config, 0, sizeof(configSet_Typedef));
     
-    rootNode = branch_create(NON_LEAF,"设置",simulate_show_list_page);
-    UniversalNode = branch_create(NON_LEAF,"通用",simulate_show_list_page);
-    KeyNode = branch_create(NON_LEAF,"键盘",simulate_show_list_page);
+    rootNode = branchCreate(NON_LEAF,"设置",simulate_show_list_page);
+    UniversalNode = branchCreate(NON_LEAF,"通用",simulate_show_list_page);
+    KeyNode = branchCreate(NON_LEAF,"键盘",simulate_show_list_page);
 
-    BluetoothNode = branch_create(NON_LEAF,"蓝牙",simulate_show_option_icon);//增加蓝牙开关控制节点
+    BluetoothNode = branchCreate(NON_LEAF,"蓝牙",simulate_show_option_icon);//增加蓝牙开关控制节点
 
     //添加,翻页测试使用
-    WifiNode = leaf_create(LEAF_OPEN, "WIFI",test_turn_page,NULL);//静态显示的
-    NotifyNode = leaf_create(LEAF_OPEN, "通知",test_turn_page,NULL);//静态显示的
-    HotsportNode = leaf_create(LEAF_OPEN, "个人热点",test_turn_page,NULL);//静态显示的
-    NoDisturbNode = leaf_create(LEAF_OPEN, "勿扰模式",test_turn_page,NULL);//静态显示的
+    WifiNode = leafCreate(LEAF_OPEN, "WIFI",test_turn_page,NULL);//静态显示的
+    NotifyNode = leafCreate(LEAF_OPEN, "通知",test_turn_page,NULL);//静态显示的
+    HotsportNode = leafCreate(LEAF_OPEN, "个人热点",test_turn_page,NULL);//静态显示的
+    NoDisturbNode = leafCreate(LEAF_OPEN, "勿扰模式",test_turn_page,NULL);//静态显示的
     /////////////
 
-    PhoneNode = leaf_create(LEAF_OPEN, "关于本机",aboutPhone_page,NULL);//静态显示的
-    TimeNode = leaf_create(LEAF_OPEN,"时间",show_dynamic_time_page,NULL);//动态显示
+    PhoneNode = leafCreate(LEAF_OPEN, "关于本机",aboutPhone_page,NULL);//静态显示的
+    TimeNode = leafCreate(LEAF_OPEN,"时间",show_dynamic_time_page,NULL);//动态显示
 
-    CorrectNode = branch_create(NON_LEAF,"自动改正",simulate_show_option_icon);//增加开关控制节点
-    oneHandleNode = branch_create(NON_LEAF,"单手键盘",simulate_show_option_icon);//增加开关控制节点
-    slideInputNode = branch_create(NON_LEAF,"滑行键入",simulate_show_option_icon);
+    CorrectNode = branchCreate(NON_LEAF,"自动改正",simulate_show_option_icon);//增加开关控制节点
+    oneHandleNode = branchCreate(NON_LEAF,"单手键盘",simulate_show_option_icon);//增加开关控制节点
+    slideInputNode = branchCreate(NON_LEAF,"滑行键入",simulate_show_option_icon);
 
 
 
     
-    BluetoothNode_1 = leaf_create(LEAF_CLOSE_MULTI_DISEN, "蓝牙",blueTooth_page_deal, &text_onoff);//增加蓝牙开关控制节点 
-    CorrectNode_1 = leaf_create(LEAF_CLOSE_MULTI_DISEN, "自动改正",autoCorrct_page_deal, &text_onoff);
-    slideInputNode_1 = leaf_create(LEAF_CLOSE_MULTI_DISEN, "滑行键入",glide_page_deal,&text_onoff);
-    oneHandleNode_1 = leaf_create(LEAF_CLOSE_NOMULTI_EN, "左",oneHandle_page_deal, &sign_onoff);
-    oneHandleNode_2 = leaf_create(LEAF_CLOSE_NOMULTI_DISEN, "中",oneHandle_page_deal, &sign_onoff);
-    oneHandleNode_3 = leaf_create(LEAF_CLOSE_NOMULTI_DISEN, "右",oneHandle_page_deal, &sign_onoff);
+    BluetoothNode_1 = leafCreate(LEAF_CLOSE_MULTI_DISEN, "蓝牙",blueTooth_page_deal, &text_onoff);//增加蓝牙开关控制节点 
+    CorrectNode_1 = leafCreate(LEAF_CLOSE_MULTI_DISEN, "自动改正",autoCorrct_page_deal, &text_onoff);
+    slideInputNode_1 = leafCreate(LEAF_CLOSE_MULTI_DISEN, "滑行键入",glide_page_deal,&text_onoff);
+    oneHandleNode_1 = leafCreate(LEAF_CLOSE_NOMULTI_EN, "左",oneHandle_page_deal, &sign_onoff);
+    oneHandleNode_2 = leafCreate(LEAF_CLOSE_NOMULTI_DISEN, "中",oneHandle_page_deal, &sign_onoff);
+    oneHandleNode_3 = leafCreate(LEAF_CLOSE_NOMULTI_DISEN, "右",oneHandle_page_deal, &sign_onoff);
 
 
 
@@ -587,7 +631,7 @@ void main()
             currentFace_refresh();
         }
 
-        cmd = gets8_t();
+        cmd = getchar();
         system("stty echo");
         switch (cmd)
         {
@@ -595,27 +639,8 @@ void main()
             if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN)
             {
                 
-                if(menuHandle.cur_choose>0){
-                    menuHandle.cur_choose--;
-                }
-
-                menuHandle.cursorPos--;
-                if(menuHandle.chosse_cnt <= PAGE_NUMS){
-                    menuHandle.show_cnt = menuHandle.chosse_cnt;
-                    if(menuHandle.cursorPos < 0){
-                        menuHandle.cursorPos = 0;//diff
-                    }
-                }else{
-                    menuHandle.show_cnt = PAGE_NUMS;
-                    if(menuHandle.cursorPos < 0){
-                        menuHandle.cursorPos = 0;
-                        if(menuHandle.startItem > 0 ){
-                            menuHandle.startItem--;
-                        }
-                    }
-                }
+                chooseCursorUp();
                 // printf("现在的选择:%d,光标:%d,开始条目:%d\n",menuHandle.cur_choose,menuHandle.cursorPos,menuHandle.startItem);
-
                 menuHandle.need_refresh = 1;
             }
             break;
@@ -625,26 +650,7 @@ void main()
         case 's'://光标向下
             if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN)
             {
-                if(menuHandle.cur_choose < menuHandle.chosse_cnt-1){
-                    menuHandle.cur_choose++;
-                }
-
-
-                menuHandle.cursorPos++;
-                if(menuHandle.chosse_cnt <= PAGE_NUMS){
-                    menuHandle.show_cnt = menuHandle.chosse_cnt;
-                    if(menuHandle.cursorPos >= menuHandle.show_cnt){
-                        menuHandle.cursorPos = menuHandle.show_cnt-1;//diff
-                    }
-                }else{
-                    menuHandle.show_cnt = PAGE_NUMS;
-                    if(menuHandle.cursorPos >= PAGE_NUMS){
-                        menuHandle.cursorPos = PAGE_NUMS-1;
-                        if(menuHandle.startItem < menuHandle.chosse_cnt - PAGE_NUMS){
-                            menuHandle.startItem++;
-                        }
-                    }
-                }
+                chooseCursorDown();
                 // printf("现在的选择:%d,光标:%d,开始条目:%d\n",menuHandle.cur_choose,menuHandle.cursorPos,menuHandle.startItem);
                 menuHandle.need_refresh = 1;
             }

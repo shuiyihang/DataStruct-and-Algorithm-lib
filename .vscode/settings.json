@@ -11,6 +11,7 @@
         "public.h": "c",
         "hi_single_list.h": "c",
         "stdlib.h": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "menubase.h": "c"
     }
 }

@@ -121,7 +121,7 @@ void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode)
                     save->cursorPos = handle->cursorPos;//提前保存一下
                     save->selectNum = handle->cur_choose;
 
-                    handle->cur_choose = 0;//注意摆放的位置
+                    handle->cur_choose = 0;//
                     handle->cursorPos = 0;
                     handle->startItem = 0;
                     handle->cur_list_head = &pos->localPos;//重新初始list
@@ -142,7 +142,7 @@ void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode)
 }
 
 
-MenuItem_Typedef* branchCreate(u8_t nodeType , const char *text, show_dir_page cb)
+MenuItem_Typedef* branchCreate(NODE_TYPE nodeType , const char *text, show_dir_page cb)
 {
     MenuItem_Typedef* non_leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(non_leaf == NULL){
@@ -158,7 +158,7 @@ MenuItem_Typedef* branchCreate(u8_t nodeType , const char *text, show_dir_page c
 } 
 
 
-MenuItem_Typedef* leafCreate(u8_t nodeType, const char *text, show_leaf_page cb , iconInfo_Typedef *argIcon)
+MenuItem_Typedef* leafCreate(NODE_TYPE nodeType, const char *text, show_leaf_page cb , iconInfo_Typedef *argIcon)
 {
     MenuItem_Typedef* leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(leaf == NULL){
@@ -199,18 +199,6 @@ void free_branch_auto(MenuItem_Typedef* non_lef)
 }
 
 
-/**
- * 测试菜单类型
- * 
- * 1. 需要再检查代表当前的menuHandle类型简化，能不能不独立出这个单独类型
- * 
- * TODO:
- * 简化重构当前的程序
- * 增加一页显示固定长度的功能
- * 
- * 增加从新页退出后恢复原来光标的位置
- * 
-*/
 void currentHandleInit(MenuItem_Typedef * root, curHandle_Typedef *handle)
 {
     memset(handle,0,sizeof(curHandle_Typedef));

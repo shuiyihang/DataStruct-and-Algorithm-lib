@@ -9,6 +9,15 @@ extern "C" {
 #endif
 
 
+typedef struct configSet
+{
+    u8_t bt_state;//蓝牙开关状态
+    u8_t correct_state;//自动改正开关
+    u8_t oneHandle_state;//单手状态
+    u8_t glid_state;//是否允许滑动
+
+}configSet_Typedef;
+
 extern configSet_Typedef *operat_config;
 extern time_t *timep;
 extern curHandle_Typedef menuHandle;

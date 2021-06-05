@@ -98,9 +98,7 @@ void test_turn_page(MenuItem_Typedef *leaf)
 void show_dynamic_time_page(MenuItem_Typedef *leaf)
 {
     printf("======%s======\n",leaf->briefInfo);
-    time(timep);
-    char *s = ctime(timep);
-    printf("%s",s);
+    printf("[动态显示测试:     .... ]\n");
     printf("====================\n");
     
 }

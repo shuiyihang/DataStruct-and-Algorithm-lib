@@ -19,7 +19,6 @@ typedef struct configSet
 }configSet_Typedef;
 
 extern configSet_Typedef *operat_config;
-extern time_t *timep;
 extern curHandle_Typedef menuHandle;
 
 void simulate_show_list_page(const MenuItem_Typedef *menu);

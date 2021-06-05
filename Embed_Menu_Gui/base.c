@@ -2,11 +2,9 @@
 #include "stdlib.h"
 #include "stdio.h"
 
-#include "time.h"
 #include "userPage.h"
 
 configSet_Typedef *operat_config;
-time_t *timep;
 curHandle_Typedef menuHandle;
 //定义开关的风格
 iconInfo_Typedef text_onoff = {
@@ -39,7 +37,6 @@ void main()
 
     MenuItem_Typedef *deal_special_page;
 
-    timep = malloc(sizeof(*timep));
     
 
     operat_config = (configSet_Typedef*)malloc(sizeof(configSet_Typedef));
@@ -151,7 +148,6 @@ void main()
 
     free_branch_auto(rootNode);
     free(operat_config);
-    free(timep);
 }
 
 

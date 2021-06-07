@@ -24,6 +24,8 @@ typedef void (*show_dir_page)(const MenuItem_Typedef *menu);
 
 typedef void (*show_leaf_page)( MenuItem_Typedef *leaf);
 
+typedef void (*updataConfig)( MenuItem_Typedef *leaf , int test);
+
 
 
 
@@ -52,7 +54,13 @@ typedef struct MenuItem
     union{
         show_dir_page   showMenu;
         show_leaf_page  endPageDeal;    //包括 显示静态/动态页面和全局配置修改后调用上一次刷新配置页面
+        updataConfig    renewConfigDeal;
     };
+    union 
+    {
+        int param;//针对可以编辑参数的节点
+    };
+    
 }MenuItem_Typedef;
 
 
@@ -65,20 +73,26 @@ typedef struct MenuItem
 #define LEAF_INIT_STATE     (1 << LEAF_STATE_BIT)
 #define MULTI_LEAF_ASSERT   (1 << LEAF_MUTLI_BIT)
 #define CAN_ENTER_ASSERT    (3 << LEAF_TYPE_BIT)
+#define NEED_DYN_ASSERT     (1)
 
 
 /**
  * 位值代表
- * 0叶子/1非叶子  1展开/0不能展开    1多选/0单选  默认状态1开/0关
+ * 0叶子/1非叶子  1展开/0不能展开    1多选/0单选            默认状态1开/0关
+ * null,         null,            1可以编辑/0不能编辑     1需要动态刷新/0静态显示的
 */
 
 typedef enum {
     NON_LEAF = 0x80,//非叶子节点
+    NON_LEAF_EDIT_EN = 0x82,
     LEAF_OPEN = 0x40 ,//可以展开的叶子节点
+    LEAF_OPEN_DYN = 0x41,//需要动态刷新的可以展开的叶子节点
+    LEAF_OPEN_EDIT_EN = 0x42,//可以进行参数编辑可以展开的叶子节点
     LEAF_CLOSE_MULTI_DISEN = 0x20,//不能展开的叶子节点, 支持多选, 默认状态是关
     LEAF_CLOSE_MULTI_EN = 0x30,//不能展开的叶子节点, 支持多选, 默认状态是开
     LEAF_CLOSE_NOMULTI_DISEN = 0,//不能展开的叶子节点, 不支持多选, 默认状态是关
     LEAF_CLOSE_NOMULTI_EN   = 0x10,//不能展开的叶子节点, 不支持多选, 默认状态是开
+    LEAF_CLOSE_EDIT_EN = 0x03,
 }NODE_TYPE;
 
 enum{
@@ -120,11 +134,12 @@ void currentFace_refresh(curHandle_Typedef *handle);
 void select_verify_deal(curHandle_Typedef *handle);
 void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode);
 MenuItem_Typedef* branchCreate(NODE_TYPE nodeType , const char *text, show_dir_page cb);
-MenuItem_Typedef* leafCreate(NODE_TYPE nodeType, const char *text, show_leaf_page cb , iconInfo_Typedef *argIcon);
+MenuItem_Typedef* leafCreate(NODE_TYPE nodeType, const char *text, void* cb , iconInfo_Typedef *argIcon);
 void free_branch_auto(MenuItem_Typedef* non_lef);
 void currentHandleInit(MenuItem_Typedef * root, curHandle_Typedef *handle);
 void chooseCursorUp(curHandle_Typedef *handle);
 void chooseCursorDown(curHandle_Typedef *handle);
+void updata_pid_param(curHandle_Typedef *handle, u8_t rise);
 
 
 #ifdef __cplusplus

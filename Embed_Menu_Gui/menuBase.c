@@ -83,7 +83,7 @@ void select_verify_deal(curHandle_Typedef *handle)
         }
         if(cnt == handle->cur_choose){
             
-            pos->endPageDeal(pos);//改变配置参数
+            pos->renewConfigDeal(pos,10);//改变配置参数
 
             if(pos->unitType&MULTI_LEAF_ASSERT)//如果支持多选,可以直接跳出去了
                 break;
@@ -97,6 +97,34 @@ void select_verify_deal(curHandle_Typedef *handle)
     }
     handle->need_refresh = 1;
 
+}
+
+
+void updata_pid_param(curHandle_Typedef *handle, u8_t rise)
+{
+    MenuItem_Typedef *pos;
+    u8_t cnt = 0;
+    struct single_list_head *ptr = handle->cur_list_head;
+    printf("pid:%d\n",handle->cur_choose);
+    single_list_for_each_entry(pos,ptr,brother)
+    {
+        // if(__get_node_type(pos->unitType) != CLOSE_LEAF_SIGN){
+        //         return;//
+        // }
+        if(cnt == handle->cur_choose){
+            if(rise){
+                pos->param++;
+            }else{
+                if(pos->param > 0){
+                    pos->param--;
+                }
+            }
+            break;
+        }
+        cnt++;
+    }
+
+    handle->need_refresh = 1;
 }
 
 
@@ -158,17 +186,22 @@ MenuItem_Typedef* branchCreate(NODE_TYPE nodeType , const char *text, show_dir_p
 } 
 
 
-MenuItem_Typedef* leafCreate(NODE_TYPE nodeType, const char *text, show_leaf_page cb , iconInfo_Typedef *argIcon)
+MenuItem_Typedef* leafCreate(NODE_TYPE nodeType, const char *text, void* cb , iconInfo_Typedef *argIcon)
 {
     MenuItem_Typedef* leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(leaf == NULL){
         return NULL;
     }
     memset(leaf,0,sizeof(MenuItem_Typedef));
-    leaf->endPageDeal = cb;
     leaf->icon = argIcon;
     leaf->unitType = nodeType;
     leaf->briefInfo = text;
+
+    if(nodeType&NEED_DYN_ASSERT){
+        leaf->renewConfigDeal = (updataConfig)cb;
+    }else{
+        leaf->endPageDeal = (show_leaf_page)cb;
+    }
 
     if(argIcon){
         if(nodeType&LEAF_INIT_STATE){

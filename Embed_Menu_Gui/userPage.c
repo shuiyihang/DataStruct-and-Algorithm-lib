@@ -66,6 +66,36 @@ void simulate_show_option_icon(const MenuItem_Typedef *menu )
     printf("================\t\n");
 }
 
+void simulate_edit_param_task(const MenuItem_Typedef *menu)
+{
+    //这个页里面进行参数编辑处理
+    const struct single_list_head *list_node = &menu->localPos;
+    MenuItem_Typedef *temp;
+    u8_t cnt = 0;
+    if(operat_config->edit_mode){
+        printf("==%s(%s)==\t\n",menu->briefInfo,"编辑模式");
+    }else{
+        printf("======%s======\t\n",menu->briefInfo);
+    }
+    
+
+    single_list_for_each_entry(temp,list_node,brother)
+    {
+        if(cnt == menuHandle.cur_choose)
+            printf("==>:%s           %d\t\n",temp->briefInfo,temp->param);//有问题
+        else
+            printf("    %s           %d\t\n",temp->briefInfo,temp->param);
+        
+        cnt++;
+    }
+    while (cnt < PAGE_NUMS)
+    {
+        cnt++;
+        printf("\n");
+    }
+    printf("================\t\n");
+}
+
 
 
 void blueTooth_page_deal( MenuItem_Typedef *leaf)
@@ -95,7 +125,7 @@ void test_turn_page(MenuItem_Typedef *leaf)
     printf("====================\n");
 }
 
-void show_dynamic_time_page(MenuItem_Typedef *leaf)
+void show_dynamic_time_page(MenuItem_Typedef *leaf, int test)
 {
     printf("======%s======\n",leaf->briefInfo);
     printf("[动态显示测试:     .... ]\n");

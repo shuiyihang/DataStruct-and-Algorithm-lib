@@ -31,7 +31,9 @@ void main()
 
     MenuItem_Typedef *BluetoothNode_1, *CorrectNode_1, *slideInputNode_1, *oneHandleNode_1, *oneHandleNode_2, *oneHandleNode_3;
 
-    MenuItem_Typedef *NotifyNode, *HotsportNode, *NoDisturbNode, *WifiNode;
+    MenuItem_Typedef *NotifyNode, *HotsportNode, *NoDisturbNode, *PidNode;
+
+    MenuItem_Typedef *P_param, *I_param ,*D_param;
 
     u8_t cmd;
 
@@ -49,7 +51,14 @@ void main()
     BluetoothNode = branchCreate(NON_LEAF,"蓝牙",simulate_show_option_icon);//增加蓝牙开关控制节点
 
     //添加,翻页测试使用
-    WifiNode = leafCreate(LEAF_OPEN, "WIFI",test_turn_page,NULL);//静态显示的
+    PidNode = branchCreate(NON_LEAF_EDIT_EN,"调参",simulate_edit_param_task);//静态显示的
+
+
+    P_param = leafCreate(LEAF_CLOSE_EDIT_EN, "P",test_turn_page,NULL);
+    I_param = leafCreate(LEAF_CLOSE_EDIT_EN, "I",test_turn_page,NULL);
+    D_param = leafCreate(LEAF_CLOSE_EDIT_EN, "D",test_turn_page,NULL);
+
+
     NotifyNode = leafCreate(LEAF_OPEN, "通知",test_turn_page,NULL);//静态显示的
     HotsportNode = leafCreate(LEAF_OPEN, "个人热点",test_turn_page,NULL);//静态显示的
     NoDisturbNode = leafCreate(LEAF_OPEN, "勿扰模式",test_turn_page,NULL);//静态显示的
@@ -76,7 +85,7 @@ void main()
 
 
 
-    tree_node_binding_oneTime(7, rootNode,BluetoothNode,WifiNode,UniversalNode,NotifyNode,HotsportNode,NoDisturbNode,TimeNode);
+    tree_node_binding_oneTime(7, rootNode,BluetoothNode,PidNode,UniversalNode,NotifyNode,HotsportNode,NoDisturbNode,TimeNode);
 
     tree_node_binding_oneTime(2, UniversalNode,PhoneNode,KeyNode);
 
@@ -87,6 +96,8 @@ void main()
     tree_node_binding_oneTime(1,CorrectNode,CorrectNode_1);
     tree_node_binding_oneTime(1,slideInputNode,slideInputNode_1);
     tree_node_binding_oneTime(3,oneHandleNode,oneHandleNode_1,oneHandleNode_2,oneHandleNode_3);
+
+    tree_node_binding_oneTime(3, PidNode,P_param,I_param,D_param);
 
     
     currentHandleInit(rootNode,&menuHandle);
@@ -107,21 +118,33 @@ void main()
         case 'w'://光标向上
             if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN)
             {
-                
-                chooseCursorUp(&menuHandle);
-                // printf("现在的选择:%d,光标:%d,开始条目:%d\n",menuHandle.cur_choose,menuHandle.cursorPos,menuHandle.startItem);
-                menuHandle.need_refresh = 1;
+                if(operat_config->edit_mode){//处于可编辑模式
+                    updata_pid_param(&menuHandle,1);
+                }else{
+                    chooseCursorUp(&menuHandle);
+                    // printf("现在的选择:%d,光标:%d,开始条目:%d\n",menuHandle.cur_choose,menuHandle.cursorPos,menuHandle.startItem);
+                    menuHandle.need_refresh = 1;
+                }
             }
             break;
         case 'a'://返回
-            enterExit_to_newPage(&menuHandle,RETURN_PAGE);
+            if(operat_config->edit_mode){
+                operat_config->edit_mode = 0;
+                menuHandle.need_refresh = 1;
+            }else{
+                enterExit_to_newPage(&menuHandle,RETURN_PAGE);
+            }
             break;
         case 's'://光标向下
             if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN)
             {
-                chooseCursorDown(&menuHandle);
-                // printf("现在的选择:%d,光标:%d,开始条目:%d\n",menuHandle.cur_choose,menuHandle.cursorPos,menuHandle.startItem);
-                menuHandle.need_refresh = 1;
+                if(operat_config->edit_mode){//处于可编辑模式
+                    updata_pid_param(&menuHandle,0);
+                }else{
+                    chooseCursorDown(&menuHandle);
+                    // printf("现在的选择:%d,光标:%d,开始条目:%d\n",menuHandle.cur_choose,menuHandle.cursorPos,menuHandle.startItem);
+                    menuHandle.need_refresh = 1;
+                }
             }
             break;
         case 'd'://进入 
@@ -130,7 +153,14 @@ void main()
         case 'e':
             //1 执行对应deal函数
             //2 刷新当前FALSE_NON_LEAF页面
-            select_verify_deal(&menuHandle);
+            if(menuHandle.cur_type != NON_LEAF_EDIT_EN){
+                select_verify_deal(&menuHandle);
+            }else{
+                //进入编辑模式
+                operat_config->edit_mode = 1;
+                menuHandle.need_refresh = 1;
+            }
+            
             break;//确认键
         default:
             break;

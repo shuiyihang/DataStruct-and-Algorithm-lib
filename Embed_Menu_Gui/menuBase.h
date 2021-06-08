@@ -51,13 +51,8 @@ typedef struct MenuItem
     struct single_list_head  localPos;  //绑定子目录的头节点
     struct single_list_head  brother;
     struct single_list_head *parentPtr;
-    union{
-        show_dir_page   showMenu;
-        show_leaf_page  endPageDeal;    //包括 显示静态/动态页面和全局配置修改后调用上一次刷新配置页面
-        updataConfig    renewConfigDeal;
-    };
 
-    //void *cb;//回调函数
+    void *cb;//回调函数
 
     void *param;//用于一些特殊需求来调参数
     
@@ -136,7 +131,7 @@ u8_t get_uplist_from_curlisthead(curHandle_Typedef *handle);
 void currentFace_refresh(curHandle_Typedef *handle);
 void select_verify_deal(curHandle_Typedef *handle);
 void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode);
-MenuItem_Typedef* branchCreate(NODE_TYPE nodeType , const char *text, show_dir_page cb);
+MenuItem_Typedef* branchCreate(NODE_TYPE nodeType , const char *text, void *cb);
 MenuItem_Typedef* leafCreate(NODE_TYPE nodeType, const char *text, void* cb , iconInfo_Typedef *argIcon);
 void free_branch_auto(MenuItem_Typedef* non_lef);
 void currentHandleInit(MenuItem_Typedef * root, curHandle_Typedef *handle);

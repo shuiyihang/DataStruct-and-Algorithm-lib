@@ -63,9 +63,9 @@ void currentFace_refresh(curHandle_Typedef *handle)
 
     handle->cur_type = pos->unitType;
     if(__get_node_type(pos->unitType) == OPEN_LEAF_SIGN){
-        pos->endPageDeal(pos);
+        ((show_leaf_page)pos->cb)(pos);
     }else if(__get_node_type(pos->unitType) == NON_LEAF_SIGN){
-        pos->showMenu(pos);
+        ((show_dir_page)pos->cb)(pos);
     }
 }
 
@@ -83,7 +83,7 @@ void select_verify_deal(curHandle_Typedef *handle)
         }
         if(cnt == handle->cur_choose){
             
-            pos->renewConfigDeal(pos,10);//改变配置参数
+            ((updataConfig)pos->cb)(pos,10);//改变配置参数
 
             if(pos->unitType&MULTI_LEAF_ASSERT)//如果支持多选,可以直接跳出去了
                 break;
@@ -170,7 +170,7 @@ void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode)
 }
 
 
-MenuItem_Typedef* branchCreate(NODE_TYPE nodeType , const char *text, show_dir_page cb)
+MenuItem_Typedef* branchCreate(NODE_TYPE nodeType , const char *text, void* cb)
 {
     MenuItem_Typedef* non_leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(non_leaf == NULL){
@@ -179,9 +179,8 @@ MenuItem_Typedef* branchCreate(NODE_TYPE nodeType , const char *text, show_dir_p
     memset(non_leaf,0,sizeof(MenuItem_Typedef));
     non_leaf->briefInfo = text;
     non_leaf->unitType = nodeType;
-    non_leaf->showMenu = cb;
+    non_leaf->cb = cb;
     
-
     return non_leaf;
 } 
 
@@ -202,11 +201,7 @@ MenuItem_Typedef* leafCreate(NODE_TYPE nodeType, const char *text, void* cb , ic
     leaf->unitType = nodeType;
     leaf->briefInfo = text;
 
-    if(nodeType&NEED_DYN_ASSERT){
-        leaf->renewConfigDeal = (updataConfig)cb;
-    }else{
-        leaf->endPageDeal = (show_leaf_page)cb;
-    }
+    leaf->cb = cb;
 
     if(argIcon){
         if(nodeType&LEAF_INIT_STATE){

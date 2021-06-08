@@ -44,6 +44,8 @@ void autoCorrct_page_deal( MenuItem_Typedef *leaf);
 void oneHandle_page_deal( MenuItem_Typedef *leaf);
 void glide_page_deal( MenuItem_Typedef *leaf);
 
+void game_page_deal(MenuItem_Typedef *leaf ,u8_t key);
+
 
 #ifdef __cplusplus
 }

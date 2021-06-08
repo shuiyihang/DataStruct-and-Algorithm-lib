@@ -31,13 +31,13 @@ void main()
 
     MenuItem_Typedef *BluetoothNode_1, *CorrectNode_1, *slideInputNode_1, *oneHandleNode_1, *oneHandleNode_2, *oneHandleNode_3;
 
-    MenuItem_Typedef *NotifyNode, *HotsportNode, *NoDisturbNode, *PidNode;
+    MenuItem_Typedef *NotifyNode, *HotsportNode, *GameNode, *PidNode;
 
     MenuItem_Typedef *P_param, *I_param ,*D_param;
 
     u8_t cmd;
 
-    MenuItem_Typedef *deal_special_page;
+    MenuItem_Typedef *deal_special_page , *littleDinosaur;
 
     
 
@@ -52,15 +52,17 @@ void main()
     UniversalNode = uintCreate(NON_LEAF,"通用",simulate_show_list_page);
     KeyNode = uintCreate(NON_LEAF,"键盘",simulate_show_list_page);
 
+    GameNode = uintCreate(NON_LEAF, "游戏",simulate_show_list_page);//测试可以玩游戏的节点
+
     BluetoothNode = uintCreate(NON_LEAF,"蓝牙",simulate_show_option_icon);//增加蓝牙开关控制节点
 
     //添加,翻页测试使用
-    PidNode = uintCreate(NON_LEAF_EDIT_EN,"调参",simulate_edit_param_task);//静态显示的
+    PidNode = uintCreate(NON_LEAF_EDIT,"调参",simulate_edit_param_task);//静态显示的
 
 
-    P_param = uintCreate(LEAF_CLOSE_EDIT_EN, "P",test_turn_page);
-    I_param = uintCreate(LEAF_CLOSE_EDIT_EN, "I",test_turn_page);
-    D_param = uintCreate(LEAF_CLOSE_EDIT_EN, "D",test_turn_page);
+    P_param = uintCreate(LEAF_CLOSE_EDIT, "P",test_turn_page);
+    I_param = uintCreate(LEAF_CLOSE_EDIT, "I",test_turn_page);
+    D_param = uintCreate(LEAF_CLOSE_EDIT, "D",test_turn_page);
 
     //绑定参数
     bindParamInit(P_param,&operat_config->p_pid);
@@ -68,39 +70,39 @@ void main()
     bindParamInit(D_param,&operat_config->d_pid);
 
 
-    NotifyNode = uintCreate(LEAF_OPEN, "通知",test_turn_page);//静态显示的
-    HotsportNode = uintCreate(LEAF_OPEN, "个人热点",test_turn_page);//静态显示的
-    NoDisturbNode = uintCreate(LEAF_OPEN, "勿扰模式",test_turn_page);//静态显示的
+    NotifyNode = uintCreate(LEAF_OPEN_STATIC, "通知",test_turn_page);//静态显示的
+    HotsportNode = uintCreate(LEAF_OPEN_STATIC, "个人热点",test_turn_page);//静态显示的
+    
     /////////////
 
-    PhoneNode = uintCreate(LEAF_OPEN, "关于本机",aboutPhone_page);//静态显示的
-    TimeNode = uintCreate(LEAF_OPEN,"时间",show_dynamic_time_page);//动态显示
+    PhoneNode = uintCreate(LEAF_OPEN_STATIC, "关于本机",aboutPhone_page);//静态显示的
+    TimeNode = uintCreate(LEAF_OPEN_STATIC,"时间",show_dynamic_time_page);//动态显示
 
     CorrectNode = uintCreate(NON_LEAF,"自动改正",simulate_show_option_icon);//增加开关控制节点
     oneHandleNode = uintCreate(NON_LEAF,"单手键盘",simulate_show_option_icon);//增加开关控制节点
     slideInputNode = uintCreate(NON_LEAF,"滑行键入",simulate_show_option_icon);
 
 
-
+    littleDinosaur = uintCreate(LEAF_OPEN_EDIT_REFRESH, "小恐龙",game_page_deal);
     
-    BluetoothNode_1 = uintCreate(LEAF_CLOSE_MULTI_DISEN, "蓝牙",blueTooth_page_deal);//增加蓝牙开关控制节点 
+    BluetoothNode_1 = uintCreate(LEAF_CLOSE_MULTI_OFF, "蓝牙",blueTooth_page_deal);//增加蓝牙开关控制节点 
     bindIconInit(BluetoothNode_1 , &text_onoff);
-    CorrectNode_1 = uintCreate(LEAF_CLOSE_MULTI_DISEN, "自动改正",autoCorrct_page_deal);
+    CorrectNode_1 = uintCreate(LEAF_CLOSE_MULTI_OFF, "自动改正",autoCorrct_page_deal);
     bindIconInit(CorrectNode_1 , &text_onoff);
-    slideInputNode_1 = uintCreate(LEAF_CLOSE_MULTI_DISEN, "滑行键入",glide_page_deal);
+    slideInputNode_1 = uintCreate(LEAF_CLOSE_MULTI_OFF, "滑行键入",glide_page_deal);
     bindIconInit(slideInputNode_1 , &text_onoff);
-    oneHandleNode_1 = uintCreate(LEAF_CLOSE_NOMULTI_EN, "左",oneHandle_page_deal);
+    oneHandleNode_1 = uintCreate(LEAF_CLOSE_ON, "左",oneHandle_page_deal);
     bindIconInit(oneHandleNode_1 , &sign_onoff);
-    oneHandleNode_2 = uintCreate(LEAF_CLOSE_NOMULTI_DISEN, "中",oneHandle_page_deal);
+    oneHandleNode_2 = uintCreate(LEAF_CLOSE_OFF, "中",oneHandle_page_deal);
     bindIconInit(oneHandleNode_2 , &sign_onoff);
-    oneHandleNode_3 = uintCreate(LEAF_CLOSE_NOMULTI_DISEN, "右",oneHandle_page_deal);
+    oneHandleNode_3 = uintCreate(LEAF_CLOSE_OFF, "右",oneHandle_page_deal);
     bindIconInit(oneHandleNode_3 , &sign_onoff);
 
 
 
+    tree_node_binding_oneTime(1,GameNode,littleDinosaur);
 
-
-    tree_node_binding_oneTime(7, rootNode,BluetoothNode,PidNode,UniversalNode,NotifyNode,HotsportNode,NoDisturbNode,TimeNode);
+    tree_node_binding_oneTime(7, rootNode,GameNode,BluetoothNode,PidNode,UniversalNode,NotifyNode,HotsportNode,TimeNode);
 
     tree_node_binding_oneTime(2, UniversalNode,PhoneNode,KeyNode);
 
@@ -117,7 +119,7 @@ void main()
     
     currentHandleInit(rootNode,&menuHandle);
 
-    
+    printf("hello\n");
 
     while(1)
     {
@@ -134,11 +136,15 @@ void main()
             if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN)
             {
                 if(menuHandle.edit_mode){//处于可编辑模式
-                    updata_pid_param(&menuHandle,1);
+                    updata_Binding_param(&menuHandle,1);
                 }else{
                     chooseCursorUp(&menuHandle);
                     // printf("现在的选择:%d,光标:%d,开始条目:%d\n",menuHandle.cur_choose,menuHandle.cursorPos,menuHandle.startItem);
-                    menuHandle.need_refresh = 1;
+                }
+            }else{
+                if(menuHandle.edit_mode){
+                    //在展开的叶子节点里面实时把值传给游戏函数
+                    key_dispatch_cb_deal(&menuHandle, 1);
                 }
             }
             break;
@@ -154,11 +160,16 @@ void main()
             if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN)
             {
                 if(menuHandle.edit_mode){//处于可编辑模式
-                    updata_pid_param(&menuHandle,0);
+                    updata_Binding_param(&menuHandle,0);
                 }else{
                     chooseCursorDown(&menuHandle);
                     // printf("现在的选择:%d,光标:%d,开始条目:%d\n",menuHandle.cur_choose,menuHandle.cursorPos,menuHandle.startItem);
-                    menuHandle.need_refresh = 1;
+                }
+            }else{
+                if(menuHandle.edit_mode){
+                    //在展开的叶子节点里面实时把值传给游戏函数
+                    printf("edit mode s\n");
+                    key_dispatch_cb_deal(&menuHandle, 2);
                 }
             }
             break;
@@ -168,10 +179,11 @@ void main()
         case 'e':
             //1 执行对应deal函数
             //2 刷新当前FALSE_NON_LEAF页面
-            if(menuHandle.cur_type != NON_LEAF_EDIT_EN){
+            if(!__node_edit_assert(menuHandle.cur_type)){
                 select_verify_deal(&menuHandle);
             }else{
                 //进入编辑模式
+                printf("edit mode e\n");
                 menuHandle.edit_mode = 1;
                 menuHandle.need_refresh = 1;
             }

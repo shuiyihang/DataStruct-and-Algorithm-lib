@@ -177,3 +177,12 @@ void configSetInit(configSet_Typedef* cfg)
     cfg->i_pid = 10;
     cfg->d_pid = 30;
 }
+
+
+void game_page_deal(MenuItem_Typedef *leaf ,u8_t key)
+{
+    printf("============\n");
+    printf("==游戏处理:%d==\n",key);
+    printf("============\n");
+
+}

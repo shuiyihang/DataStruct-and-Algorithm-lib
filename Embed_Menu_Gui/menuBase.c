@@ -72,7 +72,7 @@ void currentFace_refresh(curHandle_Typedef *handle)
 
 void select_verify_deal(curHandle_Typedef *handle)
 {
-    MenuItem_Typedef *pos;
+    MenuItem_Typedef *pos = NULL;
     u8_t cnt = 0;
     struct single_list_head *ptr = handle->cur_list_head;
 
@@ -85,10 +85,10 @@ void select_verify_deal(curHandle_Typedef *handle)
             
             ((updataConfig)pos->cb)(pos,10);//改变配置参数
 
-            if(pos->unitType&MULTI_LEAF_ASSERT)//如果支持多选,可以直接跳出去了
+            if(pos->unitType&LEAF_MULTI_ASSERT)//如果支持多选,可以直接跳出去了
                 break;
         }else{
-            if(!(pos->unitType&MULTI_LEAF_ASSERT)){//不支持多选
+            if(!(pos->unitType&LEAF_MULTI_ASSERT)){//不支持多选
                 printf("%s\n",pos->briefInfo);
                 pos->cur_icon = pos->icon->off_icon;
             }
@@ -100,7 +100,7 @@ void select_verify_deal(curHandle_Typedef *handle)
 }
 
 
-void updata_pid_param(curHandle_Typedef *handle, u8_t rise)
+void updata_Binding_param(curHandle_Typedef *handle, u8_t rise)
 {
     MenuItem_Typedef *pos;
     u8_t cnt = 0;
@@ -250,6 +250,7 @@ void chooseCursorUp(curHandle_Typedef *handle)
             }
         }
     }
+    handle->need_refresh = 1;
 }
 
 
@@ -274,4 +275,14 @@ void chooseCursorDown(curHandle_Typedef *handle)
             }
         }
     }
+    handle->need_refresh = 1;
+}
+
+
+void key_dispatch_cb_deal(curHandle_Typedef *handle, u8_t key)
+{
+    MenuItem_Typedef *pos;
+    struct single_list_head *ptr = handle->cur_list_head;
+    pos = list_entry(ptr,MenuItem_Typedef,localPos);
+    ((game_deal_page)pos->cb)(pos,key);
 }

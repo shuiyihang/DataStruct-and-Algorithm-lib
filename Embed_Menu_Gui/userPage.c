@@ -82,9 +82,9 @@ void simulate_edit_param_task(const MenuItem_Typedef *menu)
     single_list_for_each_entry(temp,list_node,brother)
     {
         if(cnt == menuHandle.cur_choose)
-            printf("==>:%s           %d\t\n",temp->briefInfo,temp->param);//有问题
+            printf("==>:%s           %d\t\n",temp->briefInfo,(*(int *)temp->param));//有问题
         else
-            printf("    %s           %d\t\n",temp->briefInfo,temp->param);
+            printf("    %s           %d\t\n",temp->briefInfo,(*(int *)temp->param));
         
         cnt++;
     }
@@ -163,4 +163,17 @@ void glide_page_deal( MenuItem_Typedef *leaf)
     }else{
         leaf->cur_icon = leaf->icon->off_icon;
     }
+}
+
+
+
+
+
+
+
+void configSetInit(configSet_Typedef* cfg)
+{
+    cfg->p_pid = 15;
+    cfg->i_pid = 10;
+    cfg->d_pid = 30;
 }

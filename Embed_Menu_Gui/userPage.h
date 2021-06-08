@@ -16,12 +16,21 @@ typedef struct configSet
     u8_t oneHandle_state;//单手状态
     u8_t glid_state;//是否允许滑动
 
+
+    /*测试调参*/
+    int p_pid;
+    int i_pid;
+    int d_pid;
+
     u8_t edit_mode;//页面是否处于可编辑模式
 
 }configSet_Typedef;
 
 extern configSet_Typedef *operat_config;
 extern curHandle_Typedef menuHandle;
+
+
+void configSetInit(configSet_Typedef* cfg);
 
 void simulate_show_list_page(const MenuItem_Typedef *menu);
 void simulate_show_option_icon(const MenuItem_Typedef *menu);

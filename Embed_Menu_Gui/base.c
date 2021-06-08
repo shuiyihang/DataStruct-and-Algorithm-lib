@@ -43,6 +43,10 @@ void main()
 
     operat_config = (configSet_Typedef*)malloc(sizeof(configSet_Typedef));
     memset(operat_config, 0, sizeof(configSet_Typedef));
+
+    //对全局配置进行一次初始化
+    configSetInit(operat_config);
+
     
     rootNode = branchCreate(NON_LEAF,"设置",simulate_show_list_page);
     UniversalNode = branchCreate(NON_LEAF,"通用",simulate_show_list_page);
@@ -57,6 +61,11 @@ void main()
     P_param = leafCreate(LEAF_CLOSE_EDIT_EN, "P",test_turn_page,NULL);
     I_param = leafCreate(LEAF_CLOSE_EDIT_EN, "I",test_turn_page,NULL);
     D_param = leafCreate(LEAF_CLOSE_EDIT_EN, "D",test_turn_page,NULL);
+
+    //绑定参数
+    bindParamInit(P_param,&operat_config->p_pid);
+    bindParamInit(I_param,&operat_config->i_pid);
+    bindParamInit(D_param,&operat_config->d_pid);
 
 
     NotifyNode = leafCreate(LEAF_OPEN, "通知",test_turn_page,NULL);//静态显示的

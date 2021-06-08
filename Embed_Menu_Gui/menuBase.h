@@ -45,7 +45,7 @@ typedef struct MenuItem
 
     s8_t selectNum;         //选中的条目序号
     s8_t cursorPos;         //光标位置
-    const char *briefInfo;  //子菜单标题信息
+    const char *briefInfo;  //节点内容信息
     const iconInfo_Typedef *icon;       //子菜单的图标信息
     const char *cur_icon;
     struct single_list_head  localPos;  //绑定子目录的头节点
@@ -56,10 +56,10 @@ typedef struct MenuItem
         show_leaf_page  endPageDeal;    //包括 显示静态/动态页面和全局配置修改后调用上一次刷新配置页面
         updataConfig    renewConfigDeal;
     };
-    union 
-    {
-        int param;//针对可以编辑参数的节点
-    };
+
+    //void *cb;//回调函数
+
+    void *param;//用于一些特殊需求来调参数
     
 }MenuItem_Typedef;
 
@@ -84,7 +84,7 @@ typedef struct MenuItem
 
 typedef enum {
     NON_LEAF = 0x80,//非叶子节点
-    NON_LEAF_EDIT_EN = 0x82,
+    NON_LEAF_EDIT_EN = 0x82,//
     LEAF_OPEN = 0x40 ,//可以展开的叶子节点
     LEAF_OPEN_DYN = 0x41,//需要动态刷新的可以展开的叶子节点
     LEAF_OPEN_EDIT_EN = 0x42,//可以进行参数编辑可以展开的叶子节点
@@ -126,6 +126,9 @@ static inline u8_t __get_node_type(u8_t multi)
 {
     return (multi>>LEAF_TYPE_BIT)&3;
 };
+
+
+void bindParamInit(MenuItem_Typedef* node, void *bindParam);
 
 void tree_node_binding_oneTime(u16_t cnt, MenuItem_Typedef *non_leaf,...);
 u8_t get_menu_choose_cnt(curHandle_Typedef *handle);

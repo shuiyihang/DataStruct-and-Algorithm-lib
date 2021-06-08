@@ -113,10 +113,10 @@ void updata_pid_param(curHandle_Typedef *handle, u8_t rise)
         // }
         if(cnt == handle->cur_choose){
             if(rise){
-                pos->param++;
+                (*(int *)pos->param)++;//参数应该转成什么类型用户是清楚的
             }else{
-                if(pos->param > 0){
-                    pos->param--;
+                if((*(int *)pos->param) > 0){
+                    (*(int *)pos->param)--;
                 }
             }
             break;
@@ -185,7 +185,12 @@ MenuItem_Typedef* branchCreate(NODE_TYPE nodeType , const char *text, show_dir_p
     return non_leaf;
 } 
 
+void bindParamInit(MenuItem_Typedef* node, void *bindParam)
+{
+    node->param = bindParam;
+}
 
+//应该只初始化共有属性，特殊属性另写函数单独初始化
 MenuItem_Typedef* leafCreate(NODE_TYPE nodeType, const char *text, void* cb , iconInfo_Typedef *argIcon)
 {
     MenuItem_Typedef* leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));

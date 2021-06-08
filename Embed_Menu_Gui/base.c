@@ -48,19 +48,19 @@ void main()
     configSetInit(operat_config);
 
     
-    rootNode = branchCreate(NON_LEAF,"设置",simulate_show_list_page);
-    UniversalNode = branchCreate(NON_LEAF,"通用",simulate_show_list_page);
-    KeyNode = branchCreate(NON_LEAF,"键盘",simulate_show_list_page);
+    rootNode = uintCreate(NON_LEAF,"设置",simulate_show_list_page);
+    UniversalNode = uintCreate(NON_LEAF,"通用",simulate_show_list_page);
+    KeyNode = uintCreate(NON_LEAF,"键盘",simulate_show_list_page);
 
-    BluetoothNode = branchCreate(NON_LEAF,"蓝牙",simulate_show_option_icon);//增加蓝牙开关控制节点
+    BluetoothNode = uintCreate(NON_LEAF,"蓝牙",simulate_show_option_icon);//增加蓝牙开关控制节点
 
     //添加,翻页测试使用
-    PidNode = branchCreate(NON_LEAF_EDIT_EN,"调参",simulate_edit_param_task);//静态显示的
+    PidNode = uintCreate(NON_LEAF_EDIT_EN,"调参",simulate_edit_param_task);//静态显示的
 
 
-    P_param = leafCreate(LEAF_CLOSE_EDIT_EN, "P",test_turn_page,NULL);
-    I_param = leafCreate(LEAF_CLOSE_EDIT_EN, "I",test_turn_page,NULL);
-    D_param = leafCreate(LEAF_CLOSE_EDIT_EN, "D",test_turn_page,NULL);
+    P_param = uintCreate(LEAF_CLOSE_EDIT_EN, "P",test_turn_page);
+    I_param = uintCreate(LEAF_CLOSE_EDIT_EN, "I",test_turn_page);
+    D_param = uintCreate(LEAF_CLOSE_EDIT_EN, "D",test_turn_page);
 
     //绑定参数
     bindParamInit(P_param,&operat_config->p_pid);
@@ -68,27 +68,33 @@ void main()
     bindParamInit(D_param,&operat_config->d_pid);
 
 
-    NotifyNode = leafCreate(LEAF_OPEN, "通知",test_turn_page,NULL);//静态显示的
-    HotsportNode = leafCreate(LEAF_OPEN, "个人热点",test_turn_page,NULL);//静态显示的
-    NoDisturbNode = leafCreate(LEAF_OPEN, "勿扰模式",test_turn_page,NULL);//静态显示的
+    NotifyNode = uintCreate(LEAF_OPEN, "通知",test_turn_page);//静态显示的
+    HotsportNode = uintCreate(LEAF_OPEN, "个人热点",test_turn_page);//静态显示的
+    NoDisturbNode = uintCreate(LEAF_OPEN, "勿扰模式",test_turn_page);//静态显示的
     /////////////
 
-    PhoneNode = leafCreate(LEAF_OPEN, "关于本机",aboutPhone_page,NULL);//静态显示的
-    TimeNode = leafCreate(LEAF_OPEN,"时间",show_dynamic_time_page,NULL);//动态显示
+    PhoneNode = uintCreate(LEAF_OPEN, "关于本机",aboutPhone_page);//静态显示的
+    TimeNode = uintCreate(LEAF_OPEN,"时间",show_dynamic_time_page);//动态显示
 
-    CorrectNode = branchCreate(NON_LEAF,"自动改正",simulate_show_option_icon);//增加开关控制节点
-    oneHandleNode = branchCreate(NON_LEAF,"单手键盘",simulate_show_option_icon);//增加开关控制节点
-    slideInputNode = branchCreate(NON_LEAF,"滑行键入",simulate_show_option_icon);
+    CorrectNode = uintCreate(NON_LEAF,"自动改正",simulate_show_option_icon);//增加开关控制节点
+    oneHandleNode = uintCreate(NON_LEAF,"单手键盘",simulate_show_option_icon);//增加开关控制节点
+    slideInputNode = uintCreate(NON_LEAF,"滑行键入",simulate_show_option_icon);
 
 
 
     
-    BluetoothNode_1 = leafCreate(LEAF_CLOSE_MULTI_DISEN, "蓝牙",blueTooth_page_deal, &text_onoff);//增加蓝牙开关控制节点 
-    CorrectNode_1 = leafCreate(LEAF_CLOSE_MULTI_DISEN, "自动改正",autoCorrct_page_deal, &text_onoff);
-    slideInputNode_1 = leafCreate(LEAF_CLOSE_MULTI_DISEN, "滑行键入",glide_page_deal,&text_onoff);
-    oneHandleNode_1 = leafCreate(LEAF_CLOSE_NOMULTI_EN, "左",oneHandle_page_deal, &sign_onoff);
-    oneHandleNode_2 = leafCreate(LEAF_CLOSE_NOMULTI_DISEN, "中",oneHandle_page_deal, &sign_onoff);
-    oneHandleNode_3 = leafCreate(LEAF_CLOSE_NOMULTI_DISEN, "右",oneHandle_page_deal, &sign_onoff);
+    BluetoothNode_1 = uintCreate(LEAF_CLOSE_MULTI_DISEN, "蓝牙",blueTooth_page_deal);//增加蓝牙开关控制节点 
+    bindIconInit(BluetoothNode_1 , &text_onoff);
+    CorrectNode_1 = uintCreate(LEAF_CLOSE_MULTI_DISEN, "自动改正",autoCorrct_page_deal);
+    bindIconInit(CorrectNode_1 , &text_onoff);
+    slideInputNode_1 = uintCreate(LEAF_CLOSE_MULTI_DISEN, "滑行键入",glide_page_deal);
+    bindIconInit(slideInputNode_1 , &text_onoff);
+    oneHandleNode_1 = uintCreate(LEAF_CLOSE_NOMULTI_EN, "左",oneHandle_page_deal);
+    bindIconInit(oneHandleNode_1 , &sign_onoff);
+    oneHandleNode_2 = uintCreate(LEAF_CLOSE_NOMULTI_DISEN, "中",oneHandle_page_deal);
+    bindIconInit(oneHandleNode_2 , &sign_onoff);
+    oneHandleNode_3 = uintCreate(LEAF_CLOSE_NOMULTI_DISEN, "右",oneHandle_page_deal);
+    bindIconInit(oneHandleNode_3 , &sign_onoff);
 
 
 

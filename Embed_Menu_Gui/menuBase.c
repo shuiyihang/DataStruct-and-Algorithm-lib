@@ -170,7 +170,7 @@ void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode)
 }
 
 
-MenuItem_Typedef* branchCreate(NODE_TYPE nodeType , const char *text, void* cb)
+MenuItem_Typedef* uintCreate(NODE_TYPE nodeType , const char *text, void* cb)
 {
     MenuItem_Typedef* non_leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(non_leaf == NULL){
@@ -189,32 +189,19 @@ void bindParamInit(MenuItem_Typedef* node, void *bindParam)
     node->param = bindParam;
 }
 
-//应该只初始化共有属性，特殊属性另写函数单独初始化
-MenuItem_Typedef* leafCreate(NODE_TYPE nodeType, const char *text, void* cb , iconInfo_Typedef *argIcon)
+void bindIconInit(MenuItem_Typedef* node , iconInfo_Typedef *argIcon)
 {
-    MenuItem_Typedef* leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
-    if(leaf == NULL){
-        return NULL;
-    }
-    memset(leaf,0,sizeof(MenuItem_Typedef));
-    leaf->icon = argIcon;
-    leaf->unitType = nodeType;
-    leaf->briefInfo = text;
-
-    leaf->cb = cb;
-
+    node->icon = argIcon;
     if(argIcon){
-        if(nodeType&LEAF_INIT_STATE){
-            leaf->cur_icon = argIcon->on_icon;
+        if(node->unitType&LEAF_INIT_STATE){
+            node->cur_icon = argIcon->on_icon;
         }else{
-            leaf->cur_icon = argIcon->off_icon;
+            node->cur_icon = argIcon->off_icon;
         }
-
     }
-
-    return leaf;
 }
 
+//应该只初始化共有属性，特殊属性另写函数单独初始化
 
 void free_branch_auto(MenuItem_Typedef* non_lef)
 {

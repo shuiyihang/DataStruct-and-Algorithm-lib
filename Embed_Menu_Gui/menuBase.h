@@ -41,20 +41,28 @@ typedef struct iconInfo
 }iconInfo_Typedef;
 typedef struct MenuItem
 {
-    u8_t unitType;          //该菜单节点的信息
+    u8_t unitType;          //该节点的类型
 
+    /*切到下一级时,记录本地用户选择信息*/
     s8_t selectNum;         //选中的条目序号
     s8_t cursorPos;         //光标位置
+
     const char *briefInfo;  //节点内容信息
-    const iconInfo_Typedef *icon;       //子菜单的图标信息
+
+    //根据具体情况决定这一块的去留,非核心
+    const iconInfo_Typedef *icon;       //菜单的图标信息
     const char *cur_icon;
+
     struct single_list_head  localPos;  //绑定子目录的头节点
     struct single_list_head  brother;
     struct single_list_head *parentPtr;
 
     void *cb;//回调函数
 
-    void *param;//用于一些特殊需求来调参数
+    /*   用于一些特殊需求来调参数
+     *   统一成指针可以索引一个结构体数据，理论上就可以管理用户需要的许多数据
+    */
+    void *param;
     
 }MenuItem_Typedef;
 
@@ -124,6 +132,7 @@ static inline u8_t __get_node_type(u8_t multi)
 
 
 void bindParamInit(MenuItem_Typedef* node, void *bindParam);
+void bindIconInit(MenuItem_Typedef* node , iconInfo_Typedef *argIcon);
 
 void tree_node_binding_oneTime(u16_t cnt, MenuItem_Typedef *non_leaf,...);
 u8_t get_menu_choose_cnt(curHandle_Typedef *handle);
@@ -131,8 +140,7 @@ u8_t get_uplist_from_curlisthead(curHandle_Typedef *handle);
 void currentFace_refresh(curHandle_Typedef *handle);
 void select_verify_deal(curHandle_Typedef *handle);
 void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode);
-MenuItem_Typedef* branchCreate(NODE_TYPE nodeType , const char *text, void *cb);
-MenuItem_Typedef* leafCreate(NODE_TYPE nodeType, const char *text, void* cb , iconInfo_Typedef *argIcon);
+MenuItem_Typedef* uintCreate(NODE_TYPE nodeType , const char *text, void *cb);
 void free_branch_auto(MenuItem_Typedef* non_lef);
 void currentHandleInit(MenuItem_Typedef * root, curHandle_Typedef *handle);
 void chooseCursorUp(curHandle_Typedef *handle);

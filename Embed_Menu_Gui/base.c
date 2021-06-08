@@ -141,7 +141,7 @@ void main()
                     chooseCursorUp(&menuHandle);
                     // printf("现在的选择:%d,光标:%d,开始条目:%d\n",menuHandle.cur_choose,menuHandle.cursorPos,menuHandle.startItem);
                 }
-            }else{
+            }else{//叶子节点 可编辑下
                 if(menuHandle.edit_mode){
                     //在展开的叶子节点里面实时把值传给游戏函数
                     key_dispatch_cb_deal(&menuHandle, 1);
@@ -179,7 +179,7 @@ void main()
         case 'e':
             //1 执行对应deal函数
             //2 刷新当前FALSE_NON_LEAF页面
-            if(!__node_edit_assert(menuHandle.cur_type)){
+            if(!__node_edit_assert(menuHandle.cur_type)){//没有编辑属性
                 select_verify_deal(&menuHandle);
             }else{
                 //进入编辑模式

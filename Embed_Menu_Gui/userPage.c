@@ -72,7 +72,7 @@ void simulate_edit_param_task(const MenuItem_Typedef *menu)
     const struct single_list_head *list_node = &menu->localPos;
     MenuItem_Typedef *temp;
     u8_t cnt = 0;
-    if(operat_config->edit_mode){
+    if(menuHandle.edit_mode){
         printf("==%s(%s)==\t\n",menu->briefInfo,"编辑模式");
     }else{
         printf("======%s======\t\n",menu->briefInfo);

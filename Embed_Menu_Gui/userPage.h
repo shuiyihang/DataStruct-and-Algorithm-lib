@@ -22,7 +22,6 @@ typedef struct configSet
     int i_pid;
     int d_pid;
 
-    u8_t edit_mode;//页面是否处于可编辑模式
 
 }configSet_Typedef;
 

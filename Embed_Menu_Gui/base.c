@@ -133,7 +133,7 @@ void main()
         case 'w'://光标向上
             if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN)
             {
-                if(operat_config->edit_mode){//处于可编辑模式
+                if(menuHandle.edit_mode){//处于可编辑模式
                     updata_pid_param(&menuHandle,1);
                 }else{
                     chooseCursorUp(&menuHandle);
@@ -143,8 +143,8 @@ void main()
             }
             break;
         case 'a'://返回
-            if(operat_config->edit_mode){
-                operat_config->edit_mode = 0;
+            if(menuHandle.edit_mode){
+                menuHandle.edit_mode = 0;
                 menuHandle.need_refresh = 1;
             }else{
                 enterExit_to_newPage(&menuHandle,RETURN_PAGE);
@@ -153,7 +153,7 @@ void main()
         case 's'://光标向下
             if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN)
             {
-                if(operat_config->edit_mode){//处于可编辑模式
+                if(menuHandle.edit_mode){//处于可编辑模式
                     updata_pid_param(&menuHandle,0);
                 }else{
                     chooseCursorDown(&menuHandle);
@@ -172,7 +172,7 @@ void main()
                 select_verify_deal(&menuHandle);
             }else{
                 //进入编辑模式
-                operat_config->edit_mode = 1;
+                menuHandle.edit_mode = 1;
                 menuHandle.need_refresh = 1;
             }
             

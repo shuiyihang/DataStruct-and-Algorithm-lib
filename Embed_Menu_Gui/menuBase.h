@@ -120,6 +120,8 @@ typedef struct curHandle
     s8_t startItem;//顶叶序号
     s8_t cursorPos;//光标位置
     
+    u8_t edit_mode;//页面是否处于可编辑模式
+    
     struct single_list_head *cur_list_head;//指向菜单的头节点
 }curHandle_Typedef;
 

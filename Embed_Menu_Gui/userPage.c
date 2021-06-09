@@ -72,6 +72,7 @@ void simulate_edit_param_task(const MenuItem_Typedef *menu)
     const struct single_list_head *list_node = &menu->localPos;
     MenuItem_Typedef *temp;
     u8_t cnt = 0;
+    u8_t keycode;
     if(menuHandle.edit_mode){
         printf("==%s(%s)==\t\n",menu->briefInfo,"编辑模式");
     }else{
@@ -81,11 +82,23 @@ void simulate_edit_param_task(const MenuItem_Typedef *menu)
 
     single_list_for_each_entry(temp,list_node,brother)
     {
-        if(cnt == menuHandle.cur_choose)
+        if(cnt == menuHandle.cur_choose){
+            //处理按键消息
+            while(!keybuffIsEmpty(&buff)){
+                // printf("key show:%c\n",getKeyFromBuff(&buff));
+                keycode = getKeyFromBuff(&buff);
+                if(keycode == KEY_UP){
+                    (*(int *)temp->param)++;
+                }else if(keycode == KEY_DOWN){
+                    if((*(int *)temp->param) > 0){
+                        (*(int *)temp->param)--;
+                    }
+                }
+            }
             printf("==>:%s           %d\t\n",temp->briefInfo,(*(int *)temp->param));//有问题
-        else
+        }else{
             printf("    %s           %d\t\n",temp->briefInfo,(*(int *)temp->param));
-        
+        }
         cnt++;
     }
     while (cnt < PAGE_NUMS)
@@ -179,10 +192,22 @@ void configSetInit(configSet_Typedef* cfg)
 }
 
 
-void game_page_deal(MenuItem_Typedef *leaf ,u8_t key)
+void game_page_deal(MenuItem_Typedef *leaf)
 {
-    printf("============\n");
-    printf("==游戏处理:%d==\n",key);
-    printf("============\n");
-
+    u8_t keycode;
+    if(!menuHandle.edit_mode){
+        //初始化游戏界面,等待确认开始
+        printf("============\n");
+        printf("==等待开始==\n");
+        printf("============\n");
+    }else{
+        //正常游戏逻辑处理
+        printf("游戏开始\n");
+        while(!keybuffIsEmpty(&buff)){
+            keycode = getKeyFromBuff(&buff);
+            if(keycode == KEY_UP){
+                printf("小恐龙跳一跳\n");
+            }
+        }
+    }
 }

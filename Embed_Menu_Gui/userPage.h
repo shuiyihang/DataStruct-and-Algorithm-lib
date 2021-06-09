@@ -27,6 +27,7 @@ typedef struct configSet
 
 extern configSet_Typedef *operat_config;
 extern curHandle_Typedef menuHandle;
+extern keybuff_Typedef buff;
 
 
 void configSetInit(configSet_Typedef* cfg);
@@ -44,7 +45,7 @@ void autoCorrct_page_deal( MenuItem_Typedef *leaf);
 void oneHandle_page_deal( MenuItem_Typedef *leaf);
 void glide_page_deal( MenuItem_Typedef *leaf);
 
-void game_page_deal(MenuItem_Typedef *leaf ,u8_t key);
+void game_page_deal(MenuItem_Typedef *leaf);
 
 
 #ifdef __cplusplus

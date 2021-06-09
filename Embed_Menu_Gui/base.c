@@ -17,6 +17,8 @@ iconInfo_Typedef sign_onoff = {
     .off_icon = " ",
 };
 
+keybuff_Typedef buff;
+
 void main()
 {
     MenuItem_Typedef *rootNode;
@@ -60,9 +62,9 @@ void main()
     PidNode = uintCreate(NON_LEAF_EDIT,"调参",simulate_edit_param_task);//静态显示的
 
 
-    P_param = uintCreate(LEAF_CLOSE_EDIT, "P",test_turn_page);
-    I_param = uintCreate(LEAF_CLOSE_EDIT, "I",test_turn_page);
-    D_param = uintCreate(LEAF_CLOSE_EDIT, "D",test_turn_page);
+    P_param = uintCreate(LEAF_CLOSE_EDIT, "P",NULL);
+    I_param = uintCreate(LEAF_CLOSE_EDIT, "I",NULL);
+    D_param = uintCreate(LEAF_CLOSE_EDIT, "D",NULL);
 
     //绑定参数
     bindParamInit(P_param,&operat_config->p_pid);
@@ -119,7 +121,8 @@ void main()
     
     currentHandleInit(rootNode,&menuHandle);
 
-    printf("hello\n");
+    keybuffInit(&buff);
+
 
     while(1)
     {
@@ -130,64 +133,54 @@ void main()
 
         cmd = getchar();
         system("stty echo");
-        switch (cmd)
+        switch (cmd)//按键只负责参数的更新,界面更新由单独函数控制
         {
         case 'w'://光标向上
-            if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN)
-            {
-                if(menuHandle.edit_mode){//处于可编辑模式
-                    updata_Binding_param(&menuHandle,1);
-                }else{
-                    chooseCursorUp(&menuHandle);
-                    // printf("现在的选择:%d,光标:%d,开始条目:%d\n",menuHandle.cur_choose,menuHandle.cursorPos,menuHandle.startItem);
-                }
-            }else{//叶子节点 可编辑下
-                if(menuHandle.edit_mode){
-                    //在展开的叶子节点里面实时把值传给游戏函数
-                    key_dispatch_cb_deal(&menuHandle, 1);
-                }
+            //向缓冲区放值
+            if(menuHandle.edit_mode){
+                //在展开的叶子节点里面实时把值传给游戏函数
+                printf("put key into buff\n");
+                putKeyToBuff(&buff,'w');
+                menuHandle.need_refresh = 1;
+            }else if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN){
+                chooseCursorUp(&menuHandle);
             }
             break;
         case 'a'://返回
             if(menuHandle.edit_mode){
-                menuHandle.edit_mode = 0;
+                putKeyToBuff(&buff,'a');
                 menuHandle.need_refresh = 1;
             }else{
                 enterExit_to_newPage(&menuHandle,RETURN_PAGE);
             }
             break;
         case 's'://光标向下
-            if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN)
-            {
-                if(menuHandle.edit_mode){//处于可编辑模式
-                    updata_Binding_param(&menuHandle,0);
-                }else{
-                    chooseCursorDown(&menuHandle);
-                    // printf("现在的选择:%d,光标:%d,开始条目:%d\n",menuHandle.cur_choose,menuHandle.cursorPos,menuHandle.startItem);
-                }
-            }else{
-                if(menuHandle.edit_mode){
-                    //在展开的叶子节点里面实时把值传给游戏函数
-                    printf("edit mode s\n");
-                    key_dispatch_cb_deal(&menuHandle, 2);
-                }
+            if(menuHandle.edit_mode){
+                //在展开的叶子节点里面实时把值传给游戏函数
+                putKeyToBuff(&buff,'s');
+                menuHandle.need_refresh = 1;
+            }else if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN){
+                chooseCursorDown(&menuHandle);
             }
             break;
         case 'd'://进入 
-            enterExit_to_newPage(&menuHandle,ENTER_PAGE);
+            if(menuHandle.edit_mode){
+                putKeyToBuff(&buff,'d');
+                menuHandle.need_refresh = 1;
+            }else{
+                enterExit_to_newPage(&menuHandle,ENTER_PAGE);
+            }
             break;
         case 'e':
-            //1 执行对应deal函数
-            //2 刷新当前FALSE_NON_LEAF页面
-            if(!__node_edit_assert(menuHandle.cur_type)){//没有编辑属性
-                select_verify_deal(&menuHandle);
-            }else{
-                //进入编辑模式
-                printf("edit mode e\n");
-                menuHandle.edit_mode = 1;
-                menuHandle.need_refresh = 1;
+            if(__node_edit_assert(menuHandle.cur_type)){//有编辑属性
+                if(menuHandle.edit_mode){
+                    menuHandle.edit_mode = 0;//游戏这里有问题
+                    keybuffInit(&buff);
+                }else{
+                    menuHandle.edit_mode = 1;
+                }
+                menuHandle.need_refresh = 1;   
             }
-            
             break;//确认键
         default:
             break;

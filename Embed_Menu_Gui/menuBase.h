@@ -18,15 +18,13 @@ extern "C" {
 
 #define PAGE_NUMS   4   //一页最多容纳 3 行
 
+#define BUFF_NUMS   10
+
 typedef struct MenuItem MenuItem_Typedef;
 
-typedef void (*show_dir_page)(const MenuItem_Typedef *menu);
+typedef void (*NodeBindingCb)( MenuItem_Typedef *);
 
-typedef void (*show_leaf_page)( MenuItem_Typedef *leaf);
 
-typedef void (*updataConfig)( MenuItem_Typedef *leaf , int test);
-
-typedef void (*game_deal_page)(MenuItem_Typedef *leaf ,u8_t key);
 
 
 
@@ -67,6 +65,33 @@ typedef struct MenuItem
     void *param;
     
 }MenuItem_Typedef;
+
+
+
+
+#define KEY_RESERVED    '0'
+#define KEY_UP          'w'
+#define KEY_DOWN        's'
+#define KEY_BACK        'a'
+#define KEY_ENTER       'd'
+#define KEY_EDIT        'e'
+
+
+
+typedef struct keybuff
+{
+    u8_t keycode[BUFF_NUMS];//键值
+    u8_t write;
+    u8_t read;
+}keybuff_Typedef;
+
+
+
+
+
+
+
+
 
 
 
@@ -162,6 +187,38 @@ static inline u8_t __node_edit_assert(u16_t edit)
 }
 
 
+
+
+
+
+
+
+void keybuffInit(keybuff_Typedef *buff);
+
+u8_t keybuffIsEmpty(keybuff_Typedef *buff);
+
+u8_t keybuffIsFull(keybuff_Typedef *buff);
+
+u8_t getKeyFromBuff(keybuff_Typedef *buff);
+
+void putKeyToBuff(keybuff_Typedef *buff , u8_t key);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 void bindParamInit(MenuItem_Typedef* node, void *bindParam);
 void bindIconInit(MenuItem_Typedef* node , iconInfo_Typedef *argIcon);
 
@@ -176,7 +233,6 @@ void free_branch_auto(MenuItem_Typedef* non_lef);
 void currentHandleInit(MenuItem_Typedef * root, curHandle_Typedef *handle);
 void chooseCursorUp(curHandle_Typedef *handle);
 void chooseCursorDown(curHandle_Typedef *handle);
-void updata_Binding_param(curHandle_Typedef *handle, u8_t rise);
 void key_dispatch_cb_deal(curHandle_Typedef *handle, u8_t key);
 
 

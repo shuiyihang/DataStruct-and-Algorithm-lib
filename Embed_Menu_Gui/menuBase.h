@@ -25,10 +25,6 @@ typedef struct MenuItem MenuItem_Typedef;
 typedef void (*NodeBindingCb)( MenuItem_Typedef *);
 
 
-
-
-
-
 /**
  * TODO 
  * 简化处理函数的类型
@@ -88,13 +84,6 @@ typedef struct keybuff
 
 
 
-
-
-
-
-
-
-
 #define LEAF_TYPE_BIT   (14)
 #define LEAF_MUTLI_BIT  (13)
 #define LEAF_STATE_BIT  (12)
@@ -129,6 +118,8 @@ typedef enum {
     NON_LEAF = UNIT_NON_LEAF,//非叶子节点
 
     NON_LEAF_EDIT = UNIT_NON_LEAF|UNIT_EDIT_EN,//非叶子节点可编辑页面
+
+    NON_LEAF_MULTI_EDIT = UNIT_NON_LEAF|UNIT_EDIT_EN|UNIT_MULTI_EN,
 
     LEAF_OPEN_STATIC = UNIT_UNFOLD ,//可以展开的叶子节点,静态显示
 
@@ -176,9 +167,9 @@ typedef struct curHandle
 
 
 
-static inline u8_t __get_node_type(u16_t multi)
+static inline u8_t __get_node_type(u16_t type)
 {
-    return (multi>>LEAF_TYPE_BIT)&3;
+    return (type>>LEAF_TYPE_BIT)&3;
 };
 
 static inline u8_t __node_edit_assert(u16_t edit)
@@ -186,13 +177,17 @@ static inline u8_t __node_edit_assert(u16_t edit)
     return (edit>>8)&8;
 }
 
+static inline u8_t __node_multi_assert(u16_t multi)
+{
+    return (multi>>12)&2;
+}
 
 
 
 
 
 
-
+/*为了实现编辑模式下时间的转发定义按键函数*/
 void keybuffInit(keybuff_Typedef *buff);
 
 u8_t keybuffIsEmpty(keybuff_Typedef *buff);
@@ -207,18 +202,6 @@ void putKeyToBuff(keybuff_Typedef *buff , u8_t key);
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 void bindParamInit(MenuItem_Typedef* node, void *bindParam);
 void bindIconInit(MenuItem_Typedef* node , iconInfo_Typedef *argIcon);
 
@@ -226,14 +209,12 @@ void tree_node_binding_oneTime(u16_t cnt, MenuItem_Typedef *non_leaf,...);
 u8_t get_menu_choose_cnt(curHandle_Typedef *handle);
 u8_t get_uplist_from_curlisthead(curHandle_Typedef *handle);
 void currentFace_refresh(curHandle_Typedef *handle);
-void select_verify_deal(curHandle_Typedef *handle);
 void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode);
 MenuItem_Typedef* uintCreate(NODE_TYPE nodeType , const char *text, void *cb);
 void free_branch_auto(MenuItem_Typedef* non_lef);
 void currentHandleInit(MenuItem_Typedef * root, curHandle_Typedef *handle);
 void chooseCursorUp(curHandle_Typedef *handle);
 void chooseCursorDown(curHandle_Typedef *handle);
-void key_dispatch_cb_deal(curHandle_Typedef *handle, u8_t key);
 
 
 #ifdef __cplusplus

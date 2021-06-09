@@ -10,10 +10,8 @@ void keybuffInit(keybuff_Typedef *buff)
 u8_t keybuffIsEmpty(keybuff_Typedef *buff)
 {
     if(buff->read == buff->write){
-        // printf("buff is empty\n");
         return True;
     }else{
-        // printf("buff not empty\n");
         return False;
     }
 }
@@ -38,24 +36,11 @@ u8_t getKeyFromBuff(keybuff_Typedef *buff)
 
 void putKeyToBuff(keybuff_Typedef *buff , u8_t key)
 {
-    // printf("write:%d\n",buff->write);
-    // printf("read:%d\n",buff->read);
     if(!keybuffIsFull(buff)){
         buff->keycode[buff->write] = key;
         buff->write = (buff->write+1)%BUFF_NUMS;
-        // printf("write:%d\n",buff->write);
     }
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -128,36 +113,6 @@ void currentFace_refresh(curHandle_Typedef *handle)
         ((NodeBindingCb)pos->cb)(pos);
     }
 }
-
-
-// void select_verify_deal(curHandle_Typedef *handle)
-// {
-//     MenuItem_Typedef *pos = NULL;
-//     u8_t cnt = 0;
-//     struct single_list_head *ptr = handle->cur_list_head;
-
-//     single_list_for_each_entry(pos,ptr,brother)
-//     {
-//         if(__get_node_type(pos->unitType) != CLOSE_LEAF_SIGN){
-//                 return;//
-//         }
-//         if(cnt == handle->cur_choose){
-            
-//             ((updataConfig)pos->cb)(pos,10);//改变配置参数
-
-//             if(pos->unitType&LEAF_MULTI_ASSERT)//如果支持多选,可以直接跳出去了
-//                 break;
-//         }else{
-//             if(!(pos->unitType&LEAF_MULTI_ASSERT)){//不支持多选
-//                 printf("%s\n",pos->briefInfo);
-//                 pos->cur_icon = pos->icon->off_icon;
-//             }
-//         }
-//         cnt++;
-//     }
-//     handle->need_refresh = 1;
-
-// }
 
 
 void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode)
@@ -311,10 +266,3 @@ void chooseCursorDown(curHandle_Typedef *handle)
 }
 
 
-// void key_dispatch_cb_deal(curHandle_Typedef *handle, u8_t key)
-// {
-//     MenuItem_Typedef *pos;
-//     struct single_list_head *ptr = handle->cur_list_head;
-//     pos = list_entry(ptr,MenuItem_Typedef,localPos);
-//     ((game_deal_page)pos->cb)(pos,key);
-// }

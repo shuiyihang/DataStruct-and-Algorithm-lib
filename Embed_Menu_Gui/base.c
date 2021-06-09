@@ -25,15 +25,12 @@ void main()
     MenuItem_Typedef *UniversalNode;
     MenuItem_Typedef *BluetoothNode;
     MenuItem_Typedef *PhoneNode;
-    MenuItem_Typedef *TimeNode;
     MenuItem_Typedef *KeyNode;
-    MenuItem_Typedef *CorrectNode;
     MenuItem_Typedef *oneHandleNode;
-    MenuItem_Typedef *slideInputNode;
 
-    MenuItem_Typedef *BluetoothNode_1, *CorrectNode_1, *slideInputNode_1, *oneHandleNode_1, *oneHandleNode_2, *oneHandleNode_3;
+    MenuItem_Typedef *BluetoothNode_1, *oneHandleNode_1, *oneHandleNode_2, *oneHandleNode_3;
 
-    MenuItem_Typedef *NotifyNode, *HotsportNode, *GameNode, *PidNode;
+    MenuItem_Typedef *GameNode, *PidNode;
 
     MenuItem_Typedef *P_param, *I_param ,*D_param;
 
@@ -56,10 +53,10 @@ void main()
 
     GameNode = uintCreate(NON_LEAF, "游戏",simulate_show_list_page);//测试可以玩游戏的节点
 
-    BluetoothNode = uintCreate(NON_LEAF,"蓝牙",simulate_show_option_icon);//增加蓝牙开关控制节点
+    BluetoothNode = uintCreate(NON_LEAF_EDIT,"蓝牙",simulate_show_option_icon);//增加蓝牙开关控制节点
 
     //添加,翻页测试使用
-    PidNode = uintCreate(NON_LEAF_EDIT,"调参",simulate_edit_param_task);//静态显示的
+    PidNode = uintCreate(NON_LEAF_EDIT,"调参",simulate_edit_param_task);//这个函数改变的是孩子节点的属性
 
 
     P_param = uintCreate(LEAF_CLOSE_EDIT, "P",NULL);
@@ -71,49 +68,38 @@ void main()
     bindParamInit(I_param,&operat_config->i_pid);
     bindParamInit(D_param,&operat_config->d_pid);
 
-
-    NotifyNode = uintCreate(LEAF_OPEN_STATIC, "通知",test_turn_page);//静态显示的
-    HotsportNode = uintCreate(LEAF_OPEN_STATIC, "个人热点",test_turn_page);//静态显示的
     
     /////////////
 
     PhoneNode = uintCreate(LEAF_OPEN_STATIC, "关于本机",aboutPhone_page);//静态显示的
-    TimeNode = uintCreate(LEAF_OPEN_STATIC,"时间",show_dynamic_time_page);//动态显示
 
-    CorrectNode = uintCreate(NON_LEAF,"自动改正",simulate_show_option_icon);//增加开关控制节点
-    oneHandleNode = uintCreate(NON_LEAF,"单手键盘",simulate_show_option_icon);//增加开关控制节点
-    slideInputNode = uintCreate(NON_LEAF,"滑行键入",simulate_show_option_icon);
-
+    oneHandleNode = uintCreate(NON_LEAF_MULTI_EDIT,"单手键盘",simulate_multi_option_page);//增加开关控制节点
+    bindParamInit(oneHandleNode,&operat_config->oneHandle_state);
 
     littleDinosaur = uintCreate(LEAF_OPEN_EDIT_REFRESH, "小恐龙",game_page_deal);
     
-    BluetoothNode_1 = uintCreate(LEAF_CLOSE_MULTI_OFF, "蓝牙",blueTooth_page_deal);//增加蓝牙开关控制节点 
+    BluetoothNode_1 = uintCreate(LEAF_CLOSE_OFF, "蓝牙",NULL);//增加蓝牙开关控制节点 
+    bindParamInit(BluetoothNode_1,&operat_config->bt_state);
     bindIconInit(BluetoothNode_1 , &text_onoff);
-    CorrectNode_1 = uintCreate(LEAF_CLOSE_MULTI_OFF, "自动改正",autoCorrct_page_deal);
-    bindIconInit(CorrectNode_1 , &text_onoff);
-    slideInputNode_1 = uintCreate(LEAF_CLOSE_MULTI_OFF, "滑行键入",glide_page_deal);
-    bindIconInit(slideInputNode_1 , &text_onoff);
-    oneHandleNode_1 = uintCreate(LEAF_CLOSE_ON, "左",oneHandle_page_deal);
+    oneHandleNode_1 = uintCreate(LEAF_CLOSE_ON, "左",NULL);//默认选中左
     bindIconInit(oneHandleNode_1 , &sign_onoff);
-    oneHandleNode_2 = uintCreate(LEAF_CLOSE_OFF, "中",oneHandle_page_deal);
+    oneHandleNode_2 = uintCreate(LEAF_CLOSE_OFF, "中",NULL);
     bindIconInit(oneHandleNode_2 , &sign_onoff);
-    oneHandleNode_3 = uintCreate(LEAF_CLOSE_OFF, "右",oneHandle_page_deal);
+    oneHandleNode_3 = uintCreate(LEAF_CLOSE_OFF, "右",NULL);
     bindIconInit(oneHandleNode_3 , &sign_onoff);
 
 
 
     tree_node_binding_oneTime(1,GameNode,littleDinosaur);
 
-    tree_node_binding_oneTime(7, rootNode,GameNode,BluetoothNode,PidNode,UniversalNode,NotifyNode,HotsportNode,TimeNode);
+    tree_node_binding_oneTime(4, rootNode,GameNode,BluetoothNode,PidNode,UniversalNode);
 
     tree_node_binding_oneTime(2, UniversalNode,PhoneNode,KeyNode);
 
-    tree_node_binding_oneTime(3, KeyNode,CorrectNode,
-                                oneHandleNode,slideInputNode);
+    tree_node_binding_oneTime(1, KeyNode,
+                                oneHandleNode);
 
     tree_node_binding_oneTime(1,BluetoothNode,BluetoothNode_1);
-    tree_node_binding_oneTime(1,CorrectNode,CorrectNode_1);
-    tree_node_binding_oneTime(1,slideInputNode,slideInputNode_1);
     tree_node_binding_oneTime(3,oneHandleNode,oneHandleNode_1,oneHandleNode_2,oneHandleNode_3);
 
     tree_node_binding_oneTime(3, PidNode,P_param,I_param,D_param);

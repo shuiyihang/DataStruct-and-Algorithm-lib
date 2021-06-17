@@ -109,9 +109,9 @@ void currentFace_refresh(curHandle_Typedef *handle)
 
     //先确定处理函数再确定键值解析
 
-    if(__get_node_type(pos->unitType) != CLOSE_LEAF_SIGN){
-        ((NodeBindingCb)pos->cb)(pos);
-    }
+    // if(__get_node_type(pos->unitType) != CLOSE_LEAF_SIGN){
+    //     ((NodeBindingCb)pos->cb)(pos);
+    // }
 }
 
 
@@ -157,7 +157,7 @@ void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode)
 }
 
 
-MenuItem_Typedef* uintCreate(NODE_TYPE nodeType , const char *text, void* cb)
+MenuItem_Typedef* uintCreate(NODE_TYPE nodeType , const char *text)
 {
     MenuItem_Typedef* non_leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(non_leaf == NULL){
@@ -166,7 +166,6 @@ MenuItem_Typedef* uintCreate(NODE_TYPE nodeType , const char *text, void* cb)
     memset(non_leaf,0,sizeof(MenuItem_Typedef));
     non_leaf->briefInfo = text;
     non_leaf->unitType = nodeType;
-    non_leaf->cb = cb;
     
     return non_leaf;
 } 

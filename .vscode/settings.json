@@ -12,6 +12,10 @@
         "hi_single_list.h": "c",
         "stdlib.h": "c",
         "type_traits": "c",
-        "menubase.h": "c"
+        "menubase.h": "c",
+        "pagebase.h": "c",
+        "config.h": "c",
+        "pagemanager.h": "c",
+        "allpage.h": "c"
     }
 }

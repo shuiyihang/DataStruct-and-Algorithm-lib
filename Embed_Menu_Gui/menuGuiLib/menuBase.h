@@ -9,8 +9,7 @@ extern "C" {
 #endif
 
 
-#include "../Common_Struct_lib/Hi_single_list.h"
-#include "../Common_Struct_lib/Hi_Queue.h"
+#include "../../Common_Struct_lib/Hi_single_list.h"
 
 
 #define True    1
@@ -24,6 +23,9 @@ typedef struct MenuItem MenuItem_Typedef;
 
 typedef void (*NodeBindingCb)( MenuItem_Typedef *);
 
+
+typedef void (*nonParamCb)(void);
+typedef void (*keyCb)(u8_t);
 
 /**
  * TODO 
@@ -53,7 +55,13 @@ typedef struct MenuItem
     struct single_list_head  brother;
     struct single_list_head *parentPtr;
 
-    void *cb;//回调函数
+
+    nonParamCb setup;
+    nonParamCb loop;
+    nonParamCb exit;
+    keyCb keyEvent;
+
+
 
     /*   用于一些特殊需求来调参数
      *   统一成指针可以索引一个结构体数据，理论上就可以管理用户需要的许多数据
@@ -161,7 +169,8 @@ typedef struct curHandle
     s8_t cursorPos;//光标位置
     
     u8_t edit_mode;//页面是否处于可编辑模式
-    
+
+    u8_t cur_node_id;//当前节点id
     struct single_list_head *cur_list_head;//指向菜单的头节点
 }curHandle_Typedef;
 
@@ -210,7 +219,7 @@ u8_t get_menu_choose_cnt(curHandle_Typedef *handle);
 u8_t get_uplist_from_curlisthead(curHandle_Typedef *handle);
 void currentFace_refresh(curHandle_Typedef *handle);
 void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode);
-MenuItem_Typedef* uintCreate(NODE_TYPE nodeType , const char *text, void *cb);
+MenuItem_Typedef* uintCreate(NODE_TYPE nodeType , const char *text);
 void free_branch_auto(MenuItem_Typedef* non_lef);
 void currentHandleInit(MenuItem_Typedef * root, curHandle_Typedef *handle);
 void chooseCursorUp(curHandle_Typedef *handle);

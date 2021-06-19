@@ -24,8 +24,16 @@ typedef struct MenuItem MenuItem_Typedef;
 typedef void (*NodeBindingCb)( MenuItem_Typedef *);
 
 
+typedef struct keybuff
+{
+    u8_t keycode[BUFF_NUMS];//键值
+    u8_t write;
+    u8_t read;
+}keybuff_Typedef;
+
+
 typedef void (*nonParamCb)(void);
-typedef void (*keyCb)(u8_t);
+typedef void (*keyCb)(keybuff_Typedef *buff);
 
 /**
  * TODO 
@@ -59,7 +67,9 @@ typedef struct MenuItem
     nonParamCb setup;
     nonParamCb loop;
     nonParamCb exit;
-    keyCb keyEvent;
+    keyCb keyEventProgress;
+
+    u8_t id;
 
 
 
@@ -80,14 +90,6 @@ typedef struct MenuItem
 #define KEY_ENTER       'd'
 #define KEY_EDIT        'e'
 
-
-
-typedef struct keybuff
-{
-    u8_t keycode[BUFF_NUMS];//键值
-    u8_t write;
-    u8_t read;
-}keybuff_Typedef;
 
 
 
@@ -168,10 +170,12 @@ typedef struct curHandle
     s8_t startItem;//顶叶序号
     s8_t cursorPos;//光标位置
     
-    u8_t edit_mode;//页面是否处于可编辑模式
 
     u8_t cur_node_id;//当前节点id
-    struct single_list_head *cur_list_head;//指向菜单的头节点
+
+    u8_t page_anim;//第一层目录下做翻页动画
+    u8_t page_switch;//是否发生了页面交替
+    u8_t exit_id;//切换页面的id
 }curHandle_Typedef;
 
 
@@ -219,7 +223,7 @@ u8_t get_menu_choose_cnt(curHandle_Typedef *handle);
 u8_t get_uplist_from_curlisthead(curHandle_Typedef *handle);
 void currentFace_refresh(curHandle_Typedef *handle);
 void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode);
-MenuItem_Typedef* uintCreate(NODE_TYPE nodeType , const char *text);
+MenuItem_Typedef* uintCreate(u8_t id , const char *text);
 void free_branch_auto(MenuItem_Typedef* non_lef);
 void currentHandleInit(MenuItem_Typedef * root, curHandle_Typedef *handle);
 void chooseCursorUp(curHandle_Typedef *handle);

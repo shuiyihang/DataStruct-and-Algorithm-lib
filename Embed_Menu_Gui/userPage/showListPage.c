@@ -6,7 +6,7 @@
 
 static void Setup()
 {
-
+    //终端页面用来设置传感器参数啥的
 }
 
 static void loop()
@@ -20,6 +20,7 @@ static void loop()
     
     u8_t cnt = 0;
     u8_t labelNum = 0;
+    system("clear");
     printf("======%s======\t\n",temp->briefInfo);
     single_list_for_each_entry(temp,list_node,brother)
     {
@@ -42,6 +43,7 @@ static void loop()
         labelNum++;
         printf("\n");
     }
+    menuHandle.need_refresh = 0;
     
     printf("================\t\n");
 }
@@ -51,14 +53,18 @@ static void Exit()
 
 }
 
-static void keyEvent(u8_t key)
+static void keyEventProgress(keybuff_Typedef *buff)
 {
+    if(keybuffIsEmpty(buff)){
+        printf("key null\n");
+        return;
+    }
+    u8_t key = getKeyFromBuff(buff);
+    printf("key :%c\n",key);
     switch (key)//按键只负责参数的更新,界面更新由单独函数控制
         {
         case 'w'://光标向上
-            if(__get_node_type(menuHandle.cur_type) == NON_LEAF_SIGN){
-                chooseCursorUp(&menuHandle);
-            } 
+            chooseCursorUp(&menuHandle);
             break;
         case 'a'://返回
             enterExit_to_newPage(&menuHandle,RETURN_PAGE);
@@ -77,18 +83,11 @@ static void keyEvent(u8_t key)
 
 
 
-
-
-
-
-
-
-
 //注册使用函数
 void NodeRegister_page_root(NodeID id)
 {
-    nodelist[id] = uintCreate(NON_LEAF,"根目录");
-    NodeRegister(id , keyEvent, Setup, loop, Exit);
+    nodelist[id] = uintCreate(id,"根目录");
+    NodeRegister(id , keyEventProgress, Setup, loop, Exit);//处理函数
 }
 
 //使用同一处理函数的写在下面即可

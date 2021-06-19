@@ -15,7 +15,7 @@ extern "C" {
 extern curHandle_Typedef menuHandle;
 
 void NodeRegister_page_root(NodeID id);
-
+void NodeRegister_page_about(NodeID id);
 
 #ifdef __cplusplus
 }

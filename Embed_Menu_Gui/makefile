@@ -1,24 +1,24 @@
 
 VPATH = ./menuGuiLib ./userPage
 
-obj := base.o ./menuGuiLib/menuBase.o ./menuGuiLib/pageManager.o
+obj := ./menuGuiLib/menuBase.o ./menuGuiLib/pageManager.o
 
 obj += ./userPage/showListPage.o
 
-build:$(obj)
-	echo $<
-	gcc -o base.out $(obj)
+obj += ./userPage/showAboutPage.o
+# 添加新文件之后在下面接着加obj就可以了
+
+build : base.o $(obj)
+	gcc -o base.out $^
+	@rm -rf *.o
+	@rm -rf ./menuGuiLib/*.o
+	@rm -rf ./userPage/*.o
 
 base.o : base.c
 
-menuBase.o : menuBase.c
-	$(MAKE) -C ./menuGuiLib
+$(obj) : %.o:%.c
+	$(if $(findstring menuGuiLib,$<),$(MAKE) -C ./menuGuiLib,$(MAKE) -C ./userPage)
 
-pageManager.o : pageManager.c
-	$(MAKE) -C ./menuGuiLib
-
-showListPage.o : showListPage.c
-	$(MAKE) -C ./userPage
 
 .PHONY : clean
 

@@ -1,6 +1,8 @@
 
 #include "menuBase.h"
+#include "config.h"
 
+extern MenuItem_Typedef *nodelist[NODE_MAX];
 
 void keybuffInit(keybuff_Typedef *buff)
 {
@@ -66,7 +68,7 @@ void tree_node_binding_oneTime(u16_t cnt, MenuItem_Typedef *non_leaf,...)
 u8_t get_menu_choose_cnt(curHandle_Typedef *handle)
 {
     u8_t cnt=0;
-    struct single_list_head* temp = handle->cur_list_head->next;
+    struct single_list_head* temp = nodelist[handle->cur_node_id]->localPos.next;
     while(temp){
         cnt++;
         temp = temp->next;
@@ -77,19 +79,21 @@ u8_t get_menu_choose_cnt(curHandle_Typedef *handle)
 u8_t get_uplist_from_curlisthead(curHandle_Typedef *handle)
 {
     MenuItem_Typedef *pos;
-    struct single_list_head *ptr = handle->cur_list_head;
-    pos = list_entry(ptr,MenuItem_Typedef,localPos);
+    pos = nodelist[handle->cur_node_id];
 
     if(pos->parentPtr == NULL){
         return False;
     }
-    handle->cur_list_head = pos->parentPtr;
-    handle->chosse_cnt = get_menu_choose_cnt(handle);//注意摆放的位置
-
-    pos = list_entry(handle->cur_list_head,MenuItem_Typedef,localPos);
+    pos = list_entry(pos->parentPtr,MenuItem_Typedef,localPos);
+    
     handle->cur_choose = pos->selectNum;
     handle->cursorPos = pos->cursorPos;
     handle->startItem = pos->selectNum - pos->cursorPos;
+
+    handle->exit_id = handle->cur_node_id;
+
+    handle->cur_node_id = pos->id;
+    handle->chosse_cnt = get_menu_choose_cnt(handle);//注意摆放的位置
 
     // printf("返回上一层现在的选择:%d,光标:%d,开始条目:%d\n",handle->cur_choose,handle->cursorPos,handle->startItem);
     return True;
@@ -99,13 +103,13 @@ u8_t get_uplist_from_curlisthead(curHandle_Typedef *handle)
 
 void currentFace_refresh(curHandle_Typedef *handle)
 {
-    MenuItem_Typedef *pos;
-    struct single_list_head *ptr = handle->cur_list_head;
+    // MenuItem_Typedef *pos;
+    // struct single_list_head *ptr = handle->cur_list_head;
 
-    system("clear");
-    pos = list_entry(ptr,MenuItem_Typedef,localPos);
+    // system("clear");
+    // pos = list_entry(ptr,MenuItem_Typedef,localPos);
 
-    handle->cur_type = pos->unitType;
+    // handle->cur_type = pos->unitType;
 
     //先确定处理函数再确定键值解析
 
@@ -115,23 +119,19 @@ void currentFace_refresh(curHandle_Typedef *handle)
 }
 
 
+
 void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode)
 {
     MenuItem_Typedef *pos,*save;
     u8_t cnt = 0;
-    struct single_list_head *ptr = handle->cur_list_head;
+    struct single_list_head *ptr = &(nodelist[handle->cur_node_id]->localPos);
     if(mode == ENTER_PAGE){
 
-        save = list_entry(ptr,MenuItem_Typedef,localPos);
-        printf("%d\n",save->unitType);
-        if(__get_node_type(save->unitType) == CLOSE_LEAF_SIGN){
-            printf("false non leaf\n");
-            return;
-        }
+        save = nodelist[handle->cur_node_id];
         if(ptr->next){//非空进入下一个页面
             single_list_for_each_entry(pos,ptr,brother)
             {
-                if(cnt == handle->cur_choose && __get_node_type(pos->unitType) != CLOSE_LEAF_SIGN){
+                if(cnt == handle->cur_choose){
 
                     save->cursorPos = handle->cursorPos;//提前保存一下
                     save->selectNum = handle->cur_choose;
@@ -139,25 +139,28 @@ void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode)
                     handle->cur_choose = 0;//
                     handle->cursorPos = 0;
                     handle->startItem = 0;
-                    handle->cur_list_head = &pos->localPos;//重新初始list
+
+                    handle->exit_id = handle->cur_node_id;
+
+                    handle->cur_node_id = pos->id;
                     
                     handle->chosse_cnt = get_menu_choose_cnt(handle);//注意摆放的位置
                     break;
                 }
                 cnt++;
             }
-            handle->need_refresh = 1;
+            handle->page_switch = 1;
         }
     }else{//返回上一级
         if(get_uplist_from_curlisthead(handle))
-            handle->need_refresh = 1;
+            handle->page_switch = 1;
     }
 
     
 }
 
 
-MenuItem_Typedef* uintCreate(NODE_TYPE nodeType , const char *text)
+MenuItem_Typedef* uintCreate(u8_t id , const char *text)
 {
     MenuItem_Typedef* non_leaf = (MenuItem_Typedef*)malloc(sizeof(MenuItem_Typedef));
     if(non_leaf == NULL){
@@ -165,7 +168,7 @@ MenuItem_Typedef* uintCreate(NODE_TYPE nodeType , const char *text)
     }
     memset(non_leaf,0,sizeof(MenuItem_Typedef));
     non_leaf->briefInfo = text;
-    non_leaf->unitType = nodeType;
+    non_leaf->id = id;
     
     return non_leaf;
 } 
@@ -205,11 +208,11 @@ void free_branch_auto(MenuItem_Typedef* non_lef)
 }
 
 
-void currentHandleInit(MenuItem_Typedef * root, curHandle_Typedef *handle)
+void currentHandleInit(MenuItem_Typedef * base, curHandle_Typedef *handle)
 {
     memset(handle,0,sizeof(curHandle_Typedef));
-    handle->cur_list_head = &root->localPos;
-    handle->cur_type = root->unitType;
+    handle->cur_node_id = root;
+    handle->cur_type = base->unitType;
     handle->chosse_cnt = get_menu_choose_cnt(handle);
     handle->need_refresh = 1;
 }

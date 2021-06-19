@@ -21,10 +21,10 @@ do{ \
 }while(0)
 
 
-void NodeRegister(NodeID id, keyCb keyEvent, nonParamCb Setup, nonParamCb loop, nonParamCb Exit);
+void NodeRegister(NodeID id, keyCb keyEventProgress, nonParamCb Setup, nonParamCb loop, nonParamCb Exit);
 
 void NodeStatusRun();
-void NodeKeyDeal(u8_t key);
+void NodeKeyDeal(keybuff_Typedef *buff);
 void NodeInit();
 
 

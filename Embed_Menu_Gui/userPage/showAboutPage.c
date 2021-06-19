@@ -12,7 +12,8 @@ static void Setup()
 static void loop()
 {
     MenuItem_Typedef *temp;
-    temp = nodelist[menuHandle.cur_node_id];
+    u8_t cur_page_id = getCurPage();
+    temp = nodelist[cur_page_id];
     system("clear");
     printf("======%s======\n",temp->briefInfo);
     printf("[名称:      蝴蝶与猫]\n");

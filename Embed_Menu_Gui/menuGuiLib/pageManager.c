@@ -4,6 +4,29 @@ MenuItem_Typedef *nodelist[NODE_MAX];
 
 extern curHandle_Typedef menuHandle;
 
+
+
+static u8_t now_page_id;
+static u8_t new_page_id;
+
+void shiftPage(u8_t id)
+{
+    new_page_id = id;
+}
+u8_t getCurPage(void)
+{
+    return now_page_id;
+}
+
+
+
+
+
+
+
+
+
+
 //公用
 void NodeRegister(NodeID id, keyCb keyEventProgress, nonParamCb Setup, nonParamCb loop, nonParamCb Exit)
 {
@@ -16,25 +39,21 @@ void NodeRegister(NodeID id, keyCb keyEventProgress, nonParamCb Setup, nonParamC
 
 void NodeStatusRun()
 {
-    if(menuHandle.page_switch)//发生了页面的切换
+    if(now_page_id != new_page_id)//发生了页面的切换
     {
         //旧页面exit
-        nodelist[menuHandle.exit_id]->exit();
+        nodelist[now_page_id]->exit();
         //新页面setup
-        nodelist[menuHandle.cur_node_id]->setup();      
+        nodelist[new_page_id]->setup();      
     
-        menuHandle.page_switch = 0;//完成切页
-
-        menuHandle.need_refresh = 1;//仅作测试
+        now_page_id = new_page_id;
+        menuHandle.chosse_cnt = get_menu_choose_cnt(now_page_id);
     }
-    if(menuHandle.need_refresh){//需要刷新时做一次刷新
-        nodelist[menuHandle.cur_node_id]->loop();
-    }
+    // if(menuHandle.need_refresh){//需要刷新时做一次刷新
+    //     nodelist[now_page_id]->loop();
+    // }
+    nodelist[now_page_id]->loop();
 
-    if(menuHandle.page_anim){//需要做动画处理
-        
-
-    }//或者立即显示出来
     
 
     //执行主循环
@@ -42,7 +61,7 @@ void NodeStatusRun()
 
 void NodeKeyDeal(keybuff_Typedef *buff)
 {
-    nodelist[menuHandle.cur_node_id]->keyEventProgress(buff);
+    nodelist[now_page_id]->keyEventProgress(buff);
 }
 
 
@@ -55,6 +74,7 @@ void NodeInit()
     // NODE_REG(setParam);
     // NODE_REG(multiSelt);
     // NODE_REG(game);
+    now_page_id = root;
     /*节点父子关系绑定*/
     tree_node_binding_oneTime(1,nodelist[root],nodelist[about]);
 

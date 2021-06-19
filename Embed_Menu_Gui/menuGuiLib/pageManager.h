@@ -27,6 +27,9 @@ void NodeStatusRun();
 void NodeKeyDeal(keybuff_Typedef *buff);
 void NodeInit();
 
+void shiftPage(u8_t id);
+u8_t getCurPage(void);
+
 
 #ifdef __cplusplus
 }

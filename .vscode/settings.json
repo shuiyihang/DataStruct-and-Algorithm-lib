@@ -16,6 +16,7 @@
         "pagebase.h": "c",
         "config.h": "c",
         "pagemanager.h": "c",
-        "allpage.h": "c"
+        "allpage.h": "c",
+        "typeinfo": "c"
     }
 }

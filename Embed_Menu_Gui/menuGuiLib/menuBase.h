@@ -163,19 +163,14 @@ typedef struct curHandle
 {
     u16_t cur_type;
     u8_t chosse_cnt;
-    u8_t show_cnt;//显示的目数
     u8_t need_refresh;//是否需要刷屏
+
+    u8_t show_cnt;
 
     s8_t cur_choose;
     s8_t startItem;//顶叶序号
     s8_t cursorPos;//光标位置
     
-
-    u8_t cur_node_id;//当前节点id
-
-    u8_t page_anim;//第一层目录下做翻页动画
-    u8_t page_switch;//是否发生了页面交替
-    u8_t exit_id;//切换页面的id
 }curHandle_Typedef;
 
 
@@ -219,7 +214,7 @@ void bindParamInit(MenuItem_Typedef* node, void *bindParam);
 void bindIconInit(MenuItem_Typedef* node , iconInfo_Typedef *argIcon);
 
 void tree_node_binding_oneTime(u16_t cnt, MenuItem_Typedef *non_leaf,...);
-u8_t get_menu_choose_cnt(curHandle_Typedef *handle);
+u8_t get_menu_choose_cnt(u8_t id);
 u8_t get_uplist_from_curlisthead(curHandle_Typedef *handle);
 void currentFace_refresh(curHandle_Typedef *handle);
 void enterExit_to_newPage(curHandle_Typedef *handle, u8_t mode);

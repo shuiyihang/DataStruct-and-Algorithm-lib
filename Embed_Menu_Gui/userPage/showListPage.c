@@ -14,7 +14,8 @@ static void loop()
     
 
     MenuItem_Typedef *temp;
-    temp = nodelist[menuHandle.cur_node_id];
+    u8_t cur_page_id = getCurPage();
+    temp = nodelist[cur_page_id];
 
     const struct single_list_head *list_node = &temp->localPos;
     

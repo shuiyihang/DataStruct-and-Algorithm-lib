@@ -1,6 +1,6 @@
 
-#ifndef __HI_SINGLE_LIST_H__
-#define __HI_SINGLE_LIST_H__
+#ifndef __HI_SLIST_H__
+#define __HI_SLIST_H__
 
 #ifdef __cplusplus
 extern "C" {

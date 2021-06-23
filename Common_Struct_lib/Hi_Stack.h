@@ -16,7 +16,7 @@ extern "C" {
 
 
 #include "public.h"
-#include "Hi_single_list.h"
+#include "Hi_slist.h"
 
 
 typedef struct single_list_head    stack_head;

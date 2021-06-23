@@ -1,7 +1,7 @@
 #ifndef __CONTROL_MOD_H__
 #define __CONTROL_MOD_H__
 //搞一些控件
-#include "../Common_Struct_lib/Hi_single_list.h"
+#include "../Common_Struct_lib/Hi_slist.h"
 #include "../Common_Struct_lib/public.h"
 
 typedef struct 

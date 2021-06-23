@@ -8,7 +8,7 @@
 #include "./Common_Struct_lib/Hi_Queue.h"
 
 
-#include "./Common_Struct_lib/Hi_list.h"
+#include "./Common_Struct_lib/Hi_dlist.h"
 
 #include "./Sort_lib/Hi_sort.h"
 
@@ -18,27 +18,28 @@
 
 #include "./String_match_lib/kmp.h"
 
+#include "./Common_Struct_lib/Hi_Queue_v2.h"
+
 
 #define PRINT_MACRO_HELPER(x) #x
 #define PRINT_MACRO(x) #x"="PRINT_MACRO_HELPER(x)           //全局宏定义查看调用
 
 
-#define COMMON_STRUCT_TEST
+// #define COMMON_STRUCT_TEST
 
 
 
 
 
-#ifdef COMMON_STRUCT_TEST
 typedef struct
 {
+    int reserve;//保留
     int data;
     char* name;
     stack_head clue;
     queue_head queue_clue;
     struct single_list_head list_clue;
 }test;
-#endif
 
 #ifdef ASTAR_TEST
 unsigned char test_maze[][10]={
@@ -185,5 +186,21 @@ void main()
     }
 #endif
 
+    test one, two, three;
+    test *temp;
+    one.name = "one test";
+    two.name = "two test";
+    three.name = "three test";
+
+    QUEUE_HEAD_V2(queue);
+    queue_append(&queue,&two);
+    queue_append(&queue,&one);
+    queue_append(&queue,&three);
+
+    while(!queue_is_empty(&queue)){
+        temp = queue_get(&queue);
+        printf("queue_test:%s\n",temp->name);
+    }
+    
 
 }

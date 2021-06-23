@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 
-#include "Hi_list.h"
+#include "Hi_dlist.h"
 
 struct priority_queue_info
 {

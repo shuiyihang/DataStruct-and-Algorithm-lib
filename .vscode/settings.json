@@ -4,14 +4,15 @@
         "hi_queue.h": "c",
         "hi_sort.h": "c",
         "hi_priorityqueue.h": "c",
-        "hi_list.h": "c",
+        "Hi_dlist.h": "c",
         "hi_stack.h": "c",
         "hi_graph.h": "c",
         "kmp.h": "c",
         "public.h": "c",
-        "hi_single_list.h": "c",
+        "Hi_slist.h": "c",
         "stdlib.h": "c",
         "type_traits": "c",
-        "menubase.h": "c"
+        "menubase.h": "c",
+        "hi_queue_v2.h": "c"
     }
 }

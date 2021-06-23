@@ -2,7 +2,7 @@
 #define __COLL_BALL_H__
 #include <sys/byteorder.h>
 
-// #include "Hi_list.h"
+// #include "Hi_dlist.h"
 #include "Adafruit_GFX_api.h"
 #include "drivers/lcd_display.h"
 #define SCREEN_WIDTH    129

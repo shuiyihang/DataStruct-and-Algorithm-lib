@@ -31,11 +31,24 @@ V1.0.0 单使用链表时功能：
 
 **注意：**
     使用:使用gcc编译器,用msvc会提示错误
+#### 2. 软件定时器
+    ./thread_timer目录
 
+#### 3. adafruit直线,圆,矩形,圆角矩形的移植
+    ./Adafruit_transplant
 
+#### 4. A*算法c实现
+    ./Graph_Algorithm_lib
 
+#### 5. 圆圈碰撞物理反弹模拟
+    ./Ball_Coll
 ## 驱动：
-#### 新增驱动：RGB_LED 21/7/24
+#### 1. st7735 lcd驱动
+    ./ST7735_driver目录
+
+#### 2. 单IO口adc实现多键,单击双击多击,长按实现逻辑
+    ./input_manager
+#### 3. RGB_LED 21/7/24
     增加spi驱动rgb灯驱动
 
 

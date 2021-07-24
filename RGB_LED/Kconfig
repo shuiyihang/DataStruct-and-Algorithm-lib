@@ -1,0 +1,10 @@
+config RGB_LED_DEV
+    bool 
+    default y
+    help
+
+config RGB_LED_DEV_NAME
+    string "name of the rgb led dev"
+    default "light_led"
+    depends on RGB_LED_DEV
+
